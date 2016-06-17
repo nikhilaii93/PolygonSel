@@ -3,6 +3,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
+import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,6 +14,8 @@ public class ApplicationDesign {
 
 	public JFrame frmPolygonsel;
 	public JTextField textField;
+	// Add name and index to component whenever a component is added.
+	private HashMap<String, Integer> componentMap;
 
 	/**
 	 * Create the application.
@@ -25,10 +28,12 @@ public class ApplicationDesign {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		componentMap = new HashMap<String, Integer>();
+		
 		frmPolygonsel = new JFrame();
 		frmPolygonsel.setTitle("PolygonSel");
 		frmPolygonsel.setIconImage(Toolkit.getDefaultToolkit().getImage("res/logo.png"));
-		frmPolygonsel.setBounds(100, 100, 450, 300);
+		frmPolygonsel.setBounds(100, 100, 1366, 768);
 		frmPolygonsel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 90, 0, 0 };
@@ -44,6 +49,8 @@ public class ApplicationDesign {
 		gbc_panel_1.gridx = 0;
 		gbc_panel_1.gridy = 0;
 		frmPolygonsel.getContentPane().add(panel_1, gbc_panel_1);
+		componentMap.put("panel_1", frmPolygonsel.getContentPane().getComponentCount() - 1);
+
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] { 0, 0 };
 		gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -74,9 +81,26 @@ public class ApplicationDesign {
 		gbc_panel.gridx = 1;
 		gbc_panel.gridy = 0;
 		frmPolygonsel.getContentPane().add(panel, gbc_panel);
+		componentMap.put("panel", frmPolygonsel.getContentPane().getComponentCount() - 1);
 
 		// Add required listeners
 		btnBrowse.addActionListener(new ImageSelector(panel));
 		panel.addMouseListener(new PointerEvent(panel, textField));
+
+		// createComponentMap();
+	}
+
+	/*
+	 * private void createComponentMap() { componentMap = new HashMap<String,
+	 * Component>(); Component[] components =
+	 * frmPolygonsel.getContentPane().getComponents(); for (int i = 0; i <
+	 * components.length; i++) { componentMap.put(components[i].getName(),
+	 * components[i]); System.out.println("nm "+components[i]); } }
+	 */
+	public int getComponentIndex(String name) {
+		if (componentMap.containsKey(name)) {
+			return componentMap.get(name);
+		} else
+			return -1;
 	}
 }
