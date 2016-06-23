@@ -1,29 +1,26 @@
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 public class PointerEvent implements MouseListener {
-	JPanel grid;
-	JTextField coordinates;
+	ImageApp frame;
+	// JTextField coordinates;
 
-	PointerEvent(JPanel mainGrid, JTextField mainCoordinates) {
-		grid = mainGrid;
-		coordinates = mainCoordinates;
+	PointerEvent(ImageApp mainGrid /*, JTextField mainCoordinates*/) {
+		frame = mainGrid;
+		// coordinates = mainCoordinates;
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
-		coordinates.setText("X:" + x + " Y:" + y);
+		// int x = e.getX();
+		// int y = e.getY();
+		// coordinates.setText("X:" + x + " Y:" + y);
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		Utility.addCoords(frame, e.getX(), e.getY());
+        Utility.drawPoint(frame, e.getX(), e.getY());
 	}
 
 	@Override

@@ -8,12 +8,14 @@ public class Launch {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ApplicationDesign window = new ApplicationDesign();
-					window.frmPolygonsel.setVisible(true);
+					// ApplicationDesign window = new ApplicationDesign();
+					// window.frmPolygonsel.setVisible(true);
+					
+					new ImageApp().create();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		});
+		});	    
 	}
 }
