@@ -117,6 +117,27 @@ public class Utility {
 		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
 			coordsX.add(X);
 			coordsY.add(Y);
+			if (coordsX.size() > 2 && !frame.savePolygon.isEnabled()) {
+				frame.savePolygon.setEnabled(true);
+			}
 		}
+		return;
+	}
+	
+	// Removes one coordinates from each coordsX & coordsY if num == 1, else
+	// for any other num value it clears the ArrayLists
+	// Disable savePolygon button if frame is not null.
+	public static void reduceCoords(int num, ImageApp frame) {
+		if (coordsX.size() > 0 && coordsY.size() > 0 && num == 1) {
+			coordsX.remove(coordsX.size() - 1);
+			coordsY.remove(coordsY.size() - 1);
+		} else {
+			coordsX.clear();
+			coordsY.clear();
+		}
+		if (coordsX.size() <=2 && frame != null && frame.savePolygon.isEnabled()) {
+			frame.savePolygon.setEnabled(true);
+		}
+		return;
 	}
 }

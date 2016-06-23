@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.TextArea;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,9 +21,11 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
@@ -42,6 +45,8 @@ public class ImageApp extends JPanel {
 	public BufferedImage image;
 	private JButton clearAllPtsBtn;
 	private JButton clearLastPtBtn;
+	public JButton savePolygon;
+	private int TITLE_LEN = 50;
 
 	public void create() {
 		JFrame f = new JFrame();
@@ -56,6 +61,8 @@ public class ImageApp extends JPanel {
 
 		menuBar.add(clearAllPtsBtn);
 		menuBar.add(clearLastPtBtn);
+		menuBar.add(savePolygon);
+		savePolygon.setEnabled(false);
 
 		f.setIconImage(Toolkit.getDefaultToolkit().getImage("res/logo.png"));
 		f.setJMenuBar(menuBar);
@@ -86,8 +93,8 @@ public class ImageApp extends JPanel {
 		clearAllPtsBtn = new JButton("clearAllPoints");
 		clearAllPtsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Utility.coordsX.clear();
-				Utility.coordsY.clear();
+				Utility.reduceCoords(0, null);
+				savePolygon.setEnabled(false);
 				removeAll();
 				repaint();
 			}
@@ -96,12 +103,42 @@ public class ImageApp extends JPanel {
 		clearLastPtBtn = new JButton("clearLastPoint");
 		clearLastPtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (Utility.coordsX.size() > 0 && Utility.coordsY.size() > 0) {
-					Utility.coordsX.remove(Utility.coordsX.size() - 1);
-					Utility.coordsY.remove(Utility.coordsY.size() - 1);
+				Utility.reduceCoords(1, null);
+				int numCoords = Utility.coordsX.size();
+				if (numCoords > 2 && !savePolygon.isEnabled()) {
+					savePolygon.setEnabled(true);
+				} else if (numCoords <= 2 && savePolygon.isEnabled()) {
+					savePolygon.setEnabled(false);
+				} else {
+					System.out.println("Impossible button state.");
 				}
+
 				removeAll();
 				repaint();
+			}
+		});
+
+		savePolygon = new JButton("savePolygon");
+		savePolygon.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JTextField title = new JTextField();
+				title.setColumns(TITLE_LEN);
+				TextArea description = new TextArea();
+
+				JPanel myPanel = new JPanel();
+				myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
+				myPanel.add(new JLabel("Title"));
+				myPanel.add(title);
+				// myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+				myPanel.add(new JLabel("Discription"));
+				myPanel.add(description);
+
+				int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter Context Details",
+						JOptionPane.OK_CANCEL_OPTION);
+				if (result == JOptionPane.OK_OPTION) {
+					System.out.println("Title: " + title.getText());
+					System.out.println("Description: " + description.getText());
+				}
 			}
 		});
 	}
@@ -120,12 +157,12 @@ public class ImageApp extends JPanel {
 		super.paintComponent(g);
 		g.drawImage(image, 0, 0, null);
 		Utility.drawPoints(this, g);
-		
-//		Polygon p = new Polygon();
-//		for (int i = 0; i < 5; i++)
-//			p.addPoint((int) (100 + 50 * Math.cos(i * 2 * Math.PI / 5)),
-//					(int) (100 + 50 * Math.sin(i * 2 * Math.PI / 5)));
-//		g.drawPolygon(p);
+
+		// Polygon p = new Polygon();
+		// for (int i = 0; i < 5; i++)
+		// p.addPoint((int) (100 + 50 * Math.cos(i * 2 * Math.PI / 5)),
+		// (int) (100 + 50 * Math.sin(i * 2 * Math.PI / 5)));
+		// g.drawPolygon(p);
 
 	}
 
@@ -145,8 +182,8 @@ public class ImageApp extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			image = null;
-			Utility.coordsX.clear();
-			Utility.coordsY.clear();
+			Utility.reduceCoords(0, null);
+			savePolygon.setEnabled(false);
 			revalidate();
 			repaint();
 		}
@@ -174,10 +211,10 @@ public class ImageApp extends JPanel {
 				File f = chooser.getSelectedFile();
 				try {
 					image = ImageIO.read(f);
+					Utility.reduceCoords(0, null);
+					savePolygon.setEnabled(false);
 					revalidate();
 					repaint();
-					Utility.coordsX.clear();
-					Utility.coordsY.clear();
 				} catch (IOException ex) {
 					ex.printStackTrace(System.err);
 				}
