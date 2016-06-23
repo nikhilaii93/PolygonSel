@@ -69,25 +69,47 @@ public class Utility {
 		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
 			Graphics g = frame.getGraphics(); // Getting the Graphic object
 			g.setColor(Color.red); // Setting color to red
-			int x = X-(radius/2); //Position X (mouse will be in the center of the point)
-	        int y = Y-(radius/2);
-	        System.out.println("Coords: " + x + " " + y);
+			int x = X - (radius / 2); // Position X (mouse will be in the center
+										// of the point)
+			int y = Y - (radius / 2);
+			System.out.println("Coords: " + x + " " + y);
 			g.fillOval(x, y, radius, radius); // Drawing the circle/point
 			g.dispose();
 		}
 	}
 
 	public static void drawPoints(ImageApp frame, Graphics g) {
-		System.out.println("drawPoints chala");
+		System.out.println("Utility.drawPoints called out.");
 		for (int i = 0; i < coordsX.size(); i++) {
 			// Graphics g = frame.getGraphics(); // Getting the Graphic object
 			g.setColor(Color.red); // Setting color to red
-	        int x = coordsX.get(i)-(radius/2); //Position X (mouse will be in the center of the point)
-	        int y = coordsY.get(i)-(radius/2);
-			
+			int x = coordsX.get(i) - (radius / 2); // Position X (mouse will be
+													// in the center of the
+													// point)
+			int y = coordsY.get(i) - (radius / 2);
+
 			System.out.println("sdfs: " + x + " " + y);
 			g.fillOval(x, y, radius, radius); // Drawing the circle/point
 			// g.dispose();
+		}
+		boolean circled = false;
+		for (int i = 1; i < coordsX.size(); i++) {
+			if (!circled && coordsX.size() > 2) {
+				g.drawLine(coordsX.get(coordsX.size() - 1), coordsY.get(coordsX.size() - 1), coordsX.get(0),
+						coordsY.get(0));
+				circled = true;
+			}
+			g.drawLine(coordsX.get(i - 1), coordsY.get(i - 1), coordsX.get(i), coordsY.get(i));
+		}
+		if (coordsX.size() > 2)  {
+			int[] xPoints = new int[coordsX.size()];
+			int[] yPoints = new int[coordsX.size()];
+			for (int i = 0; i < coordsX.size(); i++) {
+				xPoints[i] = coordsX.get(i);
+				yPoints[i] = coordsY.get(i);
+			}
+			g.setColor(new Color(1, 0, 0, 0.25f));
+			g.fillPolygon(xPoints, yPoints, xPoints.length);
 		}
 	}
 

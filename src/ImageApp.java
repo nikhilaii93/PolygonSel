@@ -1,7 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Polygon;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,7 +77,6 @@ public class ImageApp extends JPanel {
 	}
 
 	public ImageApp() {
-		final ImageApp parentClass = this;
 		this.setComponentPopupMenu(popup);
 		this.addMouseListener(new PointerEvent(this));
 		popup.add("Popup Menu");
@@ -98,13 +96,9 @@ public class ImageApp extends JPanel {
 		clearLastPtBtn = new JButton("clearLastPoint");
 		clearLastPtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				if (Utility.coordsX.size() > 0 && Utility.coordsY.size() > 0) {
 					Utility.coordsX.remove(Utility.coordsX.size() - 1);
 					Utility.coordsY.remove(Utility.coordsY.size() - 1);
-					if (image != null) {
-						//Utility.drawPoints(parentClass);
-					}
 				}
 				removeAll();
 				repaint();

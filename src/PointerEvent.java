@@ -20,7 +20,9 @@ public class PointerEvent implements MouseListener {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		Utility.addCoords(frame, e.getX(), e.getY());
-        Utility.drawPoint(frame, e.getX(), e.getY());
+		frame.removeAll();
+		frame.repaint();
+        // Utility.drawPoint(frame, e.getX(), e.getY());
 	}
 
 	@Override
