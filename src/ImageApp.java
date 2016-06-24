@@ -158,11 +158,16 @@ public class ImageApp extends JPanel {
 					clearAllPtsBtn.setEnabled(false);
 					clearLastPtBtn.setEnabled(false);
 					
+					JLabel status = (JLabel) statusPanel.getComponent(0);
+					status.setText("Status: EDIT MODE");
 				} else {
 					isEditMode = false;
 					
 					clearAllPtsBtn.setEnabled(true);
 					clearLastPtBtn.setEnabled(true);
+					
+					JLabel status = (JLabel) statusPanel.getComponent(0);
+					status.setText("Status: ");
 				}
 			}
 		});

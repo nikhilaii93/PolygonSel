@@ -20,7 +20,7 @@ public class PointerEvent implements MouseListener {
 			frame.removeAll();
 			frame.repaint();
 		} else {
-			int result = Utility.polygonTest(e.getX(), e.getY());
+			int result = Utility.pointPolygonTest(e.getX(), e.getY());
 			Utility.getContextDialogBox(result);
 		}
 	}

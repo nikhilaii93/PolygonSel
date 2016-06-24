@@ -174,18 +174,29 @@ public class Utility {
 			coordsX.add(X);
 			coordsY.add(Y);
 			
-			boolean isConvex = true;
-			if (coordsX.size() >= 3) {
-				// isConvex = isCurrentPolygonConvex();
-			}
-			if (!isConvex) {
+			if (pointPolygonTest(X, Y) >= 0) {
 				coordsX.remove(coordsX.size()-1);
 				coordsY.remove(coordsY.size()-1);
 				
-				JOptionPane.showMessageDialog(frame, "Point doesn't form a concex polygon", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "Point is already part of a polygon.", "Error", JOptionPane.ERROR_MESSAGE);
 				
 				return;
 			}
+			
+//			boolean isConvex = true;
+//			if (coordsX.size() >= 3) {
+//				isConvex = isCurrentPolygonConvex();
+//			}
+//			
+//			if (!isConvex) {
+//				coordsX.remove(coordsX.size()-1);
+//				coordsY.remove(coordsY.size()-1);
+//				
+//				JOptionPane.showMessageDialog(frame, "Point doesn't form a convex polygon.", "Error", JOptionPane.ERROR_MESSAGE);
+//				
+//				return;
+//			}
+			
 			
 			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
 			status.setText("Status: X: " + X + " Y: " + Y);
@@ -308,7 +319,9 @@ public class Utility {
 		return true;
 	}
 
-	public static int polygonTest(int X, int Y) {
+	// fillPolygon and contains both are of the class Polygon
+	// their behavior is expected to be the same
+	public static int pointPolygonTest(int X, int Y) {
 		int polygonIndex = -2;
 		for (int j = 0; j < polygonX.size(); j++) {
 			ArrayList<Integer> cX = polygonX.get(j);
