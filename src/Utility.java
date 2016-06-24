@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -17,6 +18,11 @@ public class Utility {
 	// The ratio of height:width is same for resizedImage and originalImage.
 	public static ArrayList<Integer> coordsX = new ArrayList<Integer>();
 	public static ArrayList<Integer> coordsY = new ArrayList<Integer>();
+	public static ArrayList<String> titles = new ArrayList<String>();
+	public static ArrayList<String> descriptions = new ArrayList<String>();
+	public static ArrayList<ArrayList<Integer>> polygonX = new ArrayList<ArrayList<Integer>>();
+	public static ArrayList<ArrayList<Integer>> polygonY = new ArrayList<ArrayList<Integer>>();
+
 	public static int radius = 4;
 
 	public static BufferedImage resizeImage(BufferedImage originalImage, JPanel panel) {
@@ -78,7 +84,7 @@ public class Utility {
 		}
 	}
 
-	public static void drawPoints(ImageApp frame, Graphics g) {
+	public static void drawPoints(Graphics g) {
 		System.out.println("Utility.drawPoints called out.");
 		for (int i = 0; i < coordsX.size(); i++) {
 			// Graphics g = frame.getGraphics(); // Getting the Graphic object
@@ -88,7 +94,6 @@ public class Utility {
 													// point)
 			int y = coordsY.get(i) - (radius / 2);
 
-			System.out.println("sdfs: " + x + " " + y);
 			g.fillOval(x, y, radius, radius); // Drawing the circle/point
 			// g.dispose();
 		}
@@ -101,7 +106,7 @@ public class Utility {
 			}
 			g.drawLine(coordsX.get(i - 1), coordsY.get(i - 1), coordsX.get(i), coordsY.get(i));
 		}
-		if (coordsX.size() > 2)  {
+		if (coordsX.size() > 2) {
 			int[] xPoints = new int[coordsX.size()];
 			int[] yPoints = new int[coordsX.size()];
 			for (int i = 0; i < coordsX.size(); i++) {
@@ -111,23 +116,69 @@ public class Utility {
 			g.setColor(new Color(1, 0, 0, 0.25f));
 			g.fillPolygon(xPoints, yPoints, xPoints.length);
 		}
+		drawPolygons(g);
+	}
+
+	private static void drawPolygons(Graphics g) {
+		
+		for (int j = 0; j < polygonX.size(); j++) {
+			System.out.println("PlX: " + polygonX.size());
+			System.out.println("PlX0: " + polygonX.get(0).size());
+			ArrayList<Integer> cX = polygonX.get(j);
+			ArrayList<Integer> cY = polygonY.get(j);
+			for (int i = 0; i < cX.size(); i++) {
+				// Graphics g = frame.getGraphics(); // Getting the Graphic
+				// object
+				g.setColor(Color.green); // Setting color to red
+				int x = cX.get(i) - (radius / 2); // Position X (mouse will
+														// be
+														// in the center of the
+														// point)
+				int y = cY.get(i) - (radius / 2);
+
+				g.fillOval(x, y, radius, radius); // Drawing the circle/point
+				// g.dispose();
+			}
+			boolean circled = false;
+			for (int i = 1; i < cX.size(); i++) {
+				if (!circled && cX.size() > 2) {
+					g.drawLine(cX.get(cX.size() - 1), cY.get(cX.size() - 1), cX.get(0),
+							cY.get(0));
+					circled = true;
+				}
+				g.drawLine(cX.get(i - 1), cY.get(i - 1), cX.get(i), cY.get(i));
+			}
+			if (cX.size() > 2) {
+				int[] xPoints = new int[cX.size()];
+				int[] yPoints = new int[cX.size()];
+				for (int i = 0; i < cX.size(); i++) {
+					xPoints[i] = cX.get(i);
+					yPoints[i] = cY.get(i);
+				}
+				g.setColor(new Color(0, 1, 0, 0.25f));
+				g.fillPolygon(xPoints, yPoints, xPoints.length);
+			}
+		}
 	}
 
 	public static void addCoords(ImageApp frame, int X, int Y) {
 		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
 			coordsX.add(X);
 			coordsY.add(Y);
+
+			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
+			status.setText("Status: X: " + X + " Y: " + Y);
 			if (coordsX.size() > 2 && !frame.savePolygon.isEnabled()) {
 				frame.savePolygon.setEnabled(true);
 			}
 		}
 		return;
 	}
-	
+
 	// Removes one coordinates from each coordsX & coordsY if num == 1, else
 	// for any other num value it clears the ArrayLists
 	// Disable savePolygon button if frame is not null.
-	public static void reduceCoords(int num, ImageApp frame) {
+	public static void reduceCoords(int num, JButton savePolygon) {
 		if (coordsX.size() > 0 && coordsY.size() > 0 && num == 1) {
 			coordsX.remove(coordsX.size() - 1);
 			coordsY.remove(coordsY.size() - 1);
@@ -135,9 +186,22 @@ public class Utility {
 			coordsX.clear();
 			coordsY.clear();
 		}
-		if (coordsX.size() <=2 && frame != null && frame.savePolygon.isEnabled()) {
-			frame.savePolygon.setEnabled(true);
+		if (coordsX.size() <= 2 && savePolygon.isEnabled()) {
+			savePolygon.setEnabled(false);
 		}
 		return;
+	}
+
+	public static void clearDataStructures() {
+		coordsX.clear();
+		coordsY.clear();
+		polygonX.clear();
+		polygonY.clear();
+		titles.clear();
+		descriptions.clear();
+	}
+
+	public static void writeOutContext() {
+
 	}
 }
