@@ -1,7 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.TextArea;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,10 +8,10 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -22,11 +21,10 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
@@ -48,8 +46,9 @@ public class ImageApp extends JPanel {
 	private JButton clearLastPtBtn;
 	public JButton savePolygon;
 	public JButton writeOutContext;
-	private int TITLE_LEN = 50;
+	public JToggleButton editContext;
 	public JPanel statusPanel;
+	public boolean isEditMode = false;
 
 	public void create() {
 		JFrame f = new JFrame();
@@ -68,7 +67,9 @@ public class ImageApp extends JPanel {
 		savePolygon.setEnabled(false);
 		menuBar.add(writeOutContext);
 		writeOutContext.setEnabled(false);
-		
+		menuBar.add(editContext);
+		editContext.setEnabled(false);
+
 		f.setIconImage(Toolkit.getDefaultToolkit().getImage("res/logo.png"));
 		f.setJMenuBar(menuBar);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -117,39 +118,18 @@ public class ImageApp extends JPanel {
 		savePolygon = new JButton("savePolygon");
 		savePolygon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JTextField title = new JTextField();
-				title.setColumns(TITLE_LEN);
-				TextArea description = new TextArea();
-
-				JPanel myPanel = new JPanel();
-				myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
-				myPanel.add(new JLabel("Title"));
-				myPanel.add(title);
-				myPanel.add(new JLabel("Discription"));
-				myPanel.add(description);
-
-				int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter Context Details",
-						JOptionPane.OK_CANCEL_OPTION);
-				if (result == JOptionPane.OK_OPTION) {
-					Utility.titles.add(title.getText());
-					Utility.descriptions.add(description.getText());
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyX = (ArrayList<Integer>) Utility.coordsX.clone();
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyY = (ArrayList<Integer>) Utility.coordsY.clone();
-					Utility.polygonX.add(copyX);
-					Utility.polygonY.add(copyY);
+				if (Utility.getContextDialogBox(-1)) {
 					Utility.reduceCoords(0, savePolygon);
-					System.out.println("Title: " + title.getText());
-					System.out.println("Description: " + description.getText());
 					writeOutContext.setEnabled(true);
-					
+					editContext.setEnabled(true);
+					editContext.setSelected(false);
+
 					removeAll();
 					repaint();
 				}
 			}
 		});
-		
+
 		writeOutContext = new JButton("writeOutContext");
 		writeOutContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -158,25 +138,32 @@ public class ImageApp extends JPanel {
 				Utility.clearDataStructures();
 				savePolygon.setEnabled(false);
 				writeOutContext.setEnabled(false);
-				
+
 				removeAll();
 				revalidate();
 				repaint();
 			}
 		});
-		
-		editContext = new JButton("editContext");
+
+		editContext = new JToggleButton("editContext");
 		editContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Utility.writeOutContext();
-				image = null;
-				Utility.clearDataStructures();
-				savePolygon.setEnabled(false);
-				writeOutContext.setEnabled(false);
-				
-				removeAll();
-				revalidate();
-				repaint();
+				AbstractButton abstractButton = (AbstractButton) e.getSource();
+				boolean selected = abstractButton.getModel().isSelected();
+				System.out.println("Action - selected=" + selected + "\n");
+				editContext.setSelected(selected);
+
+				if (selected) {
+					isEditMode = true;
+					clearAllPtsBtn.setEnabled(false);
+					clearLastPtBtn.setEnabled(false);
+					
+				} else {
+					isEditMode = false;
+					
+					clearAllPtsBtn.setEnabled(true);
+					clearLastPtBtn.setEnabled(true);
+				}
 			}
 		});
 	}

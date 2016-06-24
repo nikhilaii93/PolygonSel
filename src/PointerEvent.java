@@ -15,9 +15,14 @@ public class PointerEvent implements MouseListener {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		Utility.addCoords(frame, e.getX(), e.getY());
-		frame.removeAll();
-		frame.repaint();
+		if (!frame.isEditMode) {
+			Utility.addCoords(frame, e.getX(), e.getY());
+			frame.removeAll();
+			frame.repaint();
+		} else {
+			int result = Utility.polygonTest(e.getX(), e.getY());
+			Utility.getContextDialogBox(result);
+		}
 	}
 
 	@Override

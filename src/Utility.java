@@ -3,14 +3,19 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.TextArea;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class Utility {
 	// Returns resizedImage whose either height or width fits is equal to that
@@ -24,6 +29,8 @@ public class Utility {
 	public static ArrayList<ArrayList<Integer>> polygonY = new ArrayList<ArrayList<Integer>>();
 
 	public static int radius = 4;
+
+	public static int TITLE_LEN = 50;
 
 	public static BufferedImage resizeImage(BufferedImage originalImage, JPanel panel) {
 		int orgHt = originalImage.getHeight();
@@ -120,7 +127,7 @@ public class Utility {
 	}
 
 	private static void drawPolygons(Graphics g) {
-		
+
 		for (int j = 0; j < polygonX.size(); j++) {
 			System.out.println("PlX: " + polygonX.size());
 			System.out.println("PlX0: " + polygonX.get(0).size());
@@ -131,9 +138,9 @@ public class Utility {
 				// object
 				g.setColor(Color.green); // Setting color to red
 				int x = cX.get(i) - (radius / 2); // Position X (mouse will
-														// be
-														// in the center of the
-														// point)
+													// be
+													// in the center of the
+													// point)
 				int y = cY.get(i) - (radius / 2);
 
 				g.fillOval(x, y, radius, radius); // Drawing the circle/point
@@ -142,8 +149,7 @@ public class Utility {
 			boolean circled = false;
 			for (int i = 1; i < cX.size(); i++) {
 				if (!circled && cX.size() > 2) {
-					g.drawLine(cX.get(cX.size() - 1), cY.get(cX.size() - 1), cX.get(0),
-							cY.get(0));
+					g.drawLine(cX.get(cX.size() - 1), cY.get(cX.size() - 1), cX.get(0), cY.get(0));
 					circled = true;
 				}
 				g.drawLine(cX.get(i - 1), cY.get(i - 1), cX.get(i), cY.get(i));
@@ -161,11 +167,26 @@ public class Utility {
 		}
 	}
 
+	// Adds coordinates of a point only if the image is open and the point is on the image.
+	// Also, the point selected should form a convex polygon.
 	public static void addCoords(ImageApp frame, int X, int Y) {
 		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
 			coordsX.add(X);
 			coordsY.add(Y);
-
+			
+			boolean isConvex = true;
+			if (coordsX.size() >= 3) {
+				// isConvex = isCurrentPolygonConvex();
+			}
+			if (!isConvex) {
+				coordsX.remove(coordsX.size()-1);
+				coordsY.remove(coordsY.size()-1);
+				
+				JOptionPane.showMessageDialog(frame, "Point doesn't form a concex polygon", "Error", JOptionPane.ERROR_MESSAGE);
+				
+				return;
+			}
+			
 			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
 			status.setText("Status: X: " + X + " Y: " + Y);
 			if (coordsX.size() > 2 && !frame.savePolygon.isEnabled()) {
@@ -203,5 +224,107 @@ public class Utility {
 
 	public static void writeOutContext() {
 
+	}
+
+	// polygonIndex:
+	// -1 indicates that this is not an edit mode
+	// >=0 value is the index of the polygon detected by polygon test
+	// -2 edit mode is on but the pointer is not inside any polygon
+	public static boolean getContextDialogBox(int polygonIndex) {
+		if (polygonIndex > -2) {
+			JTextField title = new JTextField();
+			title.setColumns(TITLE_LEN);
+			TextArea description = new TextArea();
+
+			if (polygonIndex >= 0) {
+				title.setText(titles.get(polygonIndex));
+				description.setText(descriptions.get(polygonIndex));
+			}
+
+			JPanel myPanel = new JPanel();
+			myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
+			myPanel.add(new JLabel("Title"));
+			myPanel.add(title);
+			myPanel.add(new JLabel("Discription"));
+			myPanel.add(description);
+
+			int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter Context Details",
+					JOptionPane.OK_CANCEL_OPTION);
+			if (result == JOptionPane.OK_OPTION) {
+
+				if (polygonIndex == -1) {
+					Utility.titles.add(title.getText());
+					Utility.descriptions.add(description.getText());
+					@SuppressWarnings("unchecked")
+					ArrayList<Integer> copyX = (ArrayList<Integer>) Utility.coordsX.clone();
+					@SuppressWarnings("unchecked")
+					ArrayList<Integer> copyY = (ArrayList<Integer>) Utility.coordsY.clone();
+					Utility.polygonX.add(copyX);
+					Utility.polygonY.add(copyY);
+				} else {
+					Utility.titles.set(polygonIndex, title.getText());
+					Utility.descriptions.set(polygonIndex, description.getText());
+				}
+				System.out.println("Title: " + title.getText());
+				System.out.println("Description: " + description.getText());
+			}
+			return (result == JOptionPane.OK_OPTION);
+		}
+
+		return false;
+	}
+
+	// TODO By default returns true.
+	// 		Edit to check if lines of polygon cut each other.
+	// 		Convexity is not an issue
+	public static boolean isCurrentPolygonConvex() {
+		if (coordsX.size() < 3) {
+			return false;
+		}
+
+		int px, py;
+		int vx, vy;
+		int ux, uy;
+		int res = 0;
+		for (int i = 0; i < coordsX.size(); i++) {
+			px = coordsX.get(i);
+			py = coordsY.get(i);
+			int tmpx = coordsX.get((i + 1) % coordsX.size());
+			int tmpy = coordsY.get((i + 1) % coordsX.size());
+			
+			vx = tmpx - px;
+			vy = tmpy - py;
+			ux = coordsX.get((i + 2) % coordsX.size());
+			uy = coordsY.get((i + 2) % coordsX.size());
+
+			if (i == 0) // in first loop direction is unknown, so save it in res
+				res = ux * vy - uy * vx + vx * py - vy * px;
+			else {
+				int newres = ux * vy - uy * vx + vx * py - vy * px;
+				if ((newres > 0 && res < 0) || (newres < 0 && res > 0))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	public static int polygonTest(int X, int Y) {
+		int polygonIndex = -2;
+		for (int j = 0; j < polygonX.size(); j++) {
+			ArrayList<Integer> cX = polygonX.get(j);
+			ArrayList<Integer> cY = polygonY.get(j);
+			int[] xPoints = new int[cX.size()];
+			int[] yPoints = new int[cY.size()];
+			for (int i = 0; i < cX.size(); i++) {
+				xPoints[i] = cX.get(i);
+				yPoints[i] = cY.get(i);
+			}
+			Polygon curr = new Polygon(xPoints, yPoints, xPoints.length);
+			if (curr.contains(X, Y)) {
+				polygonIndex = j;
+			}
+		}
+
+		return polygonIndex;
 	}
 }
