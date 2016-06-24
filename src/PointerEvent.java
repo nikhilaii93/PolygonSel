@@ -21,7 +21,7 @@ public class PointerEvent implements MouseListener {
 			frame.repaint();
 		} else {
 			int result = Utility.pointPolygonTest(e.getX(), e.getY());
-			Utility.getContextDialogBox(result);
+			ContextDialogBox.getContextDialogBox(result);
 		}
 	}
 

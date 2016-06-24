@@ -5,17 +5,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
-import java.awt.TextArea;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class Utility {
 	// Returns resizedImage whose either height or width fits is equal to that
@@ -23,14 +20,10 @@ public class Utility {
 	// The ratio of height:width is same for resizedImage and originalImage.
 	public static ArrayList<Integer> coordsX = new ArrayList<Integer>();
 	public static ArrayList<Integer> coordsY = new ArrayList<Integer>();
-	public static ArrayList<String> titles = new ArrayList<String>();
-	public static ArrayList<String> descriptions = new ArrayList<String>();
 	public static ArrayList<ArrayList<Integer>> polygonX = new ArrayList<ArrayList<Integer>>();
 	public static ArrayList<ArrayList<Integer>> polygonY = new ArrayList<ArrayList<Integer>>();
 
 	public static int radius = 4;
-
-	public static int TITLE_LEN = 50;
 
 	public static BufferedImage resizeImage(BufferedImage originalImage, JPanel panel) {
 		int orgHt = originalImage.getHeight();
@@ -167,37 +160,24 @@ public class Utility {
 		}
 	}
 
-	// Adds coordinates of a point only if the image is open and the point is on the image.
+	// Adds coordinates of a point only if the image is open and the point is on
+	// the image.
 	// Also, the point selected should form a convex polygon.
 	public static void addCoords(ImageApp frame, int X, int Y) {
 		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
 			coordsX.add(X);
 			coordsY.add(Y);
-			
+
 			if (pointPolygonTest(X, Y) >= 0) {
-				coordsX.remove(coordsX.size()-1);
-				coordsY.remove(coordsY.size()-1);
-				
-				JOptionPane.showMessageDialog(frame, "Point is already part of a polygon.", "Error", JOptionPane.ERROR_MESSAGE);
-				
+				coordsX.remove(coordsX.size() - 1);
+				coordsY.remove(coordsY.size() - 1);
+
+				JOptionPane.showMessageDialog(frame, "Point is already part of a polygon.", "Error",
+						JOptionPane.ERROR_MESSAGE);
+
 				return;
 			}
-			
-//			boolean isConvex = true;
-//			if (coordsX.size() >= 3) {
-//				isConvex = isCurrentPolygonConvex();
-//			}
-//			
-//			if (!isConvex) {
-//				coordsX.remove(coordsX.size()-1);
-//				coordsY.remove(coordsY.size()-1);
-//				
-//				JOptionPane.showMessageDialog(frame, "Point doesn't form a convex polygon.", "Error", JOptionPane.ERROR_MESSAGE);
-//				
-//				return;
-//			}
-			
-			
+
 			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
 			status.setText("Status: X: " + X + " Y: " + Y);
 			if (coordsX.size() > 2 && !frame.savePolygon.isEnabled()) {
@@ -229,94 +209,13 @@ public class Utility {
 		coordsY.clear();
 		polygonX.clear();
 		polygonY.clear();
-		titles.clear();
-		descriptions.clear();
+		ContextDialogBox.titles.clear();
+		ContextDialogBox.descText.clear();
+		ContextDialogBox.descAudio.clear();
 	}
 
 	public static void writeOutContext() {
 
-	}
-
-	// polygonIndex:
-	// -1 indicates that this is not an edit mode
-	// >=0 value is the index of the polygon detected by polygon test
-	// -2 edit mode is on but the pointer is not inside any polygon
-	public static boolean getContextDialogBox(int polygonIndex) {
-		if (polygonIndex > -2) {
-			JTextField title = new JTextField();
-			title.setColumns(TITLE_LEN);
-			TextArea description = new TextArea();
-
-			if (polygonIndex >= 0) {
-				title.setText(titles.get(polygonIndex));
-				description.setText(descriptions.get(polygonIndex));
-			}
-
-			JPanel myPanel = new JPanel();
-			myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
-			myPanel.add(new JLabel("Title"));
-			myPanel.add(title);
-			myPanel.add(new JLabel("Discription"));
-			myPanel.add(description);
-
-			int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter Context Details",
-					JOptionPane.OK_CANCEL_OPTION);
-			if (result == JOptionPane.OK_OPTION) {
-
-				if (polygonIndex == -1) {
-					Utility.titles.add(title.getText());
-					Utility.descriptions.add(description.getText());
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyX = (ArrayList<Integer>) Utility.coordsX.clone();
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyY = (ArrayList<Integer>) Utility.coordsY.clone();
-					Utility.polygonX.add(copyX);
-					Utility.polygonY.add(copyY);
-				} else {
-					Utility.titles.set(polygonIndex, title.getText());
-					Utility.descriptions.set(polygonIndex, description.getText());
-				}
-				System.out.println("Title: " + title.getText());
-				System.out.println("Description: " + description.getText());
-			}
-			return (result == JOptionPane.OK_OPTION);
-		}
-
-		return false;
-	}
-
-	// TODO By default returns true.
-	// 		Edit to check if lines of polygon cut each other.
-	// 		Convexity is not an issue
-	public static boolean isCurrentPolygonConvex() {
-		if (coordsX.size() < 3) {
-			return false;
-		}
-
-		int px, py;
-		int vx, vy;
-		int ux, uy;
-		int res = 0;
-		for (int i = 0; i < coordsX.size(); i++) {
-			px = coordsX.get(i);
-			py = coordsY.get(i);
-			int tmpx = coordsX.get((i + 1) % coordsX.size());
-			int tmpy = coordsY.get((i + 1) % coordsX.size());
-			
-			vx = tmpx - px;
-			vy = tmpy - py;
-			ux = coordsX.get((i + 2) % coordsX.size());
-			uy = coordsY.get((i + 2) % coordsX.size());
-
-			if (i == 0) // in first loop direction is unknown, so save it in res
-				res = ux * vy - uy * vx + vx * py - vy * px;
-			else {
-				int newres = ux * vy - uy * vx + vx * py - vy * px;
-				if ((newres > 0 && res < 0) || (newres < 0 && res > 0))
-					return false;
-			}
-		}
-		return true;
 	}
 
 	// fillPolygon and contains both are of the class Polygon

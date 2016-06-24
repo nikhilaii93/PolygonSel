@@ -62,7 +62,9 @@ public class ImageApp extends JPanel {
 		menuBar.add(menu);
 
 		menuBar.add(clearAllPtsBtn);
+		clearAllPtsBtn.setEnabled(false);
 		menuBar.add(clearLastPtBtn);
+		clearLastPtBtn.setEnabled(false);
 		menuBar.add(savePolygon);
 		savePolygon.setEnabled(false);
 		menuBar.add(writeOutContext);
@@ -118,7 +120,7 @@ public class ImageApp extends JPanel {
 		savePolygon = new JButton("savePolygon");
 		savePolygon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				if (Utility.getContextDialogBox(-1)) {
+				if (ContextDialogBox.getContextDialogBox(-1)) {
 					Utility.reduceCoords(0, savePolygon);
 					writeOutContext.setEnabled(true);
 					editContext.setEnabled(true);
@@ -133,6 +135,8 @@ public class ImageApp extends JPanel {
 		writeOutContext = new JButton("writeOutContext");
 		writeOutContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				// new ImageSaveAction("Save");
+				
 				Utility.writeOutContext();
 				image = null;
 				Utility.clearDataStructures();
@@ -215,6 +219,8 @@ public class ImageApp extends JPanel {
 			Utility.clearDataStructures();
 			savePolygon.setEnabled(false);
 			writeOutContext.setEnabled(false);
+			clearLastPtBtn.setEnabled(false);
+			clearAllPtsBtn.setEnabled(false);
 			revalidate();
 			repaint();
 		}
@@ -245,11 +251,38 @@ public class ImageApp extends JPanel {
 					Utility.clearDataStructures();
 					savePolygon.setEnabled(false);
 					writeOutContext.setEnabled(false);
+					clearLastPtBtn.setEnabled(true);
+					clearAllPtsBtn.setEnabled(true);
 					revalidate();
 					repaint();
 				} catch (IOException ex) {
 					ex.printStackTrace(System.err);
 				}
+			}
+		}
+	}
+	
+	private class ImageSaveAction extends AbstractAction {
+
+		/**
+		 * Auto-generated serial ID
+		 */
+		private static final long serialVersionUID = 8471497794328093321L;
+
+		public ImageSaveAction(String name) {
+			super(name);
+			this.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
+			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "jpeg");
+			chooser.setFileFilter(filter);
+			int returnVal = chooser.showSaveDialog(chooser);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File f = chooser.getSelectedFile();
+				
 			}
 		}
 	}
