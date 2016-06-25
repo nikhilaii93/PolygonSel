@@ -47,8 +47,11 @@ public class ImageApp extends JPanel {
 	public JButton savePolygon;
 	public JButton writeOutContext;
 	public JToggleButton editContext;
+	public JToggleButton markCorners;
 	public JPanel statusPanel;
+	
 	public boolean isEditMode = false;
+	public boolean isCornerMode = false;
 
 	public void create() {
 		JFrame f = new JFrame();
@@ -63,14 +66,23 @@ public class ImageApp extends JPanel {
 
 		menuBar.add(clearAllPtsBtn);
 		clearAllPtsBtn.setEnabled(false);
+		clearAllPtsBtn.setToolTipText("Clears all the points marked");
 		menuBar.add(clearLastPtBtn);
 		clearLastPtBtn.setEnabled(false);
+		clearLastPtBtn.setToolTipText("Clears the last point marked");
 		menuBar.add(savePolygon);
 		savePolygon.setEnabled(false);
-		menuBar.add(writeOutContext);
-		writeOutContext.setEnabled(false);
+		savePolygon.setToolTipText("Saves the polygon(red)");
 		menuBar.add(editContext);
 		editContext.setEnabled(false);
+		editContext.setToolTipText("Edit details of a polygon(green)");
+		menuBar.add(markCorners);
+		markCorners.setEnabled(false);
+		markCorners.setSelected(false);
+		markCorners.setToolTipText("Corner Mode toggle, to mark corners");
+		menuBar.add(writeOutContext);
+		writeOutContext.setEnabled(false);
+		writeOutContext.setToolTipText("Generates output file, after sufficient details saved");
 
 		f.setIconImage(Toolkit.getDefaultToolkit().getImage("res/logo.png"));
 		f.setJMenuBar(menuBar);
@@ -98,31 +110,43 @@ public class ImageApp extends JPanel {
 		popup.add(new JMenuItem(openAction));
 		popup.add(new JMenuItem(clearAction));
 
-		clearAllPtsBtn = new JButton("clearAllPoints");
+		clearAllPtsBtn = new JButton("CLEAR");
 		clearAllPtsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Utility.reduceCoords(0, savePolygon);
-				savePolygon.setEnabled(false);
+				if (!isCornerMode) {
+					Utility.reduceCoords(0, savePolygon);
+					savePolygon.setEnabled(false);
+				} else {
+					Utility.reduceCorners(0);
+					writeOutContext.setEnabled(false);
+				}
 				removeAll();
 				repaint();
 			}
 		});
 
-		clearLastPtBtn = new JButton("clearLastPoint");
+		clearLastPtBtn = new JButton("UNDO");
 		clearLastPtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Utility.reduceCoords(1, savePolygon);
+				if (!isCornerMode) {
+					Utility.reduceCoords(1, savePolygon);
+				} else {
+					Utility.reduceCorners(1);
+					writeOutContext.setEnabled(false);
+				}
 				removeAll();
 				repaint();
 			}
 		});
 
-		savePolygon = new JButton("savePolygon");
+		savePolygon = new JButton("SAVE");
 		savePolygon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if (ContextDialogBox.getContextDialogBox(-1)) {
 					Utility.reduceCoords(0, savePolygon);
-					writeOutContext.setEnabled(true);
+					if (Utility.cornersX.size() == 4) {
+						writeOutContext.setEnabled(true);
+					}
 					editContext.setEnabled(true);
 					editContext.setSelected(false);
 
@@ -132,24 +156,27 @@ public class ImageApp extends JPanel {
 			}
 		});
 
-		writeOutContext = new JButton("writeOutContext");
+		writeOutContext = new JButton("Generate Output");
 		writeOutContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// new ImageSaveAction("Save");
 				
-				Utility.writeOutContext();
-				image = null;
-				Utility.clearDataStructures();
-				savePolygon.setEnabled(false);
-				writeOutContext.setEnabled(false);
+				JFileChooser fileChooser = new JFileChooser();
+				if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
+					String filePath = fileChooser.getSelectedFile().getPath();
+				  	Utility.writeOutContext(filePath);
+					image = null;
+					Utility.clearDataStructures();
+					savePolygon.setEnabled(false);
+					writeOutContext.setEnabled(false);
 
-				removeAll();
-				revalidate();
-				repaint();
+					removeAll();
+					revalidate();
+					repaint();
+				}
 			}
 		});
 
-		editContext = new JToggleButton("editContext");
+		editContext = new JToggleButton("Edit Mode");
 		editContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AbstractButton abstractButton = (AbstractButton) e.getSource();
@@ -161,6 +188,9 @@ public class ImageApp extends JPanel {
 					isEditMode = true;
 					clearAllPtsBtn.setEnabled(false);
 					clearLastPtBtn.setEnabled(false);
+					savePolygon.setEnabled(false);
+					markCorners.setEnabled(false);
+					writeOutContext.setEnabled(false);
 					
 					JLabel status = (JLabel) statusPanel.getComponent(0);
 					status.setText("Status: EDIT MODE");
@@ -172,6 +202,30 @@ public class ImageApp extends JPanel {
 					
 					JLabel status = (JLabel) statusPanel.getComponent(0);
 					status.setText("Status: ");
+				}
+			}
+		});
+		
+		markCorners = new JToggleButton("Corner Mode");
+		markCorners.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AbstractButton abstractButton = (AbstractButton) e.getSource();
+				boolean selected = abstractButton.getModel().isSelected();
+				markCorners.setSelected(selected);
+				
+				if (selected) {
+					isCornerMode = true;
+					removeAll();
+					revalidate();
+					repaint();
+				} else {
+					isCornerMode = false;
+					if (Utility.cornersX.size() == 4 && Utility.coordsX.size() > 0) {
+						writeOutContext.setEnabled(true);
+					}
+					removeAll();
+					revalidate();
+					repaint();
 				}
 			}
 		});
@@ -190,14 +244,11 @@ public class ImageApp extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.drawImage(image, 0, 0, null);
-		Utility.drawPoints(g);
-
-		// Polygon p = new Polygon();
-		// for (int i = 0; i < 5; i++)
-		// p.addPoint((int) (100 + 50 * Math.cos(i * 2 * Math.PI / 5)),
-		// (int) (100 + 50 * Math.sin(i * 2 * Math.PI / 5)));
-		// g.drawPolygon(p);
-
+		if (isCornerMode) {
+			Utility.drawCorners(g);
+		} else {
+			Utility.drawPoints(g);
+		}
 	}
 
 	private class ClearAction extends AbstractAction {
@@ -221,6 +272,7 @@ public class ImageApp extends JPanel {
 			writeOutContext.setEnabled(false);
 			clearLastPtBtn.setEnabled(false);
 			clearAllPtsBtn.setEnabled(false);
+			markCorners.setEnabled(false);
 			revalidate();
 			repaint();
 		}
@@ -253,36 +305,12 @@ public class ImageApp extends JPanel {
 					writeOutContext.setEnabled(false);
 					clearLastPtBtn.setEnabled(true);
 					clearAllPtsBtn.setEnabled(true);
+					markCorners.setEnabled(true);
 					revalidate();
 					repaint();
 				} catch (IOException ex) {
 					ex.printStackTrace(System.err);
 				}
-			}
-		}
-	}
-	
-	private class ImageSaveAction extends AbstractAction {
-
-		/**
-		 * Auto-generated serial ID
-		 */
-		private static final long serialVersionUID = 8471497794328093321L;
-
-		public ImageSaveAction(String name) {
-			super(name);
-			this.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
-			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "jpeg");
-			chooser.setFileFilter(filter);
-			int returnVal = chooser.showSaveDialog(chooser);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File f = chooser.getSelectedFile();
-				
 			}
 		}
 	}

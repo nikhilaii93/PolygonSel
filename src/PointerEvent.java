@@ -16,7 +16,11 @@ public class PointerEvent implements MouseListener {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		if (!frame.isEditMode) {
-			Utility.addCoords(frame, e.getX(), e.getY());
+			if (!frame.isCornerMode) {
+				Utility.addCoords(frame, e.getX(), e.getY());
+			} else {
+				Utility.addCorners(frame, e.getX(), e.getY());
+			}
 			frame.removeAll();
 			frame.repaint();
 		} else {

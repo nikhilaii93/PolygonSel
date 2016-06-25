@@ -22,6 +22,8 @@ public class Utility {
 	public static ArrayList<Integer> coordsY = new ArrayList<Integer>();
 	public static ArrayList<ArrayList<Integer>> polygonX = new ArrayList<ArrayList<Integer>>();
 	public static ArrayList<ArrayList<Integer>> polygonY = new ArrayList<ArrayList<Integer>>();
+	public static ArrayList<Integer> cornersX = new ArrayList<Integer>();
+	public static ArrayList<Integer> cornersY = new ArrayList<Integer>();
 
 	public static int radius = 4;
 
@@ -119,6 +121,16 @@ public class Utility {
 		drawPolygons(g);
 	}
 
+	public static void drawCorners(Graphics g) {
+		g.setColor(Color.blue); // Setting color to red
+		for (int i = 0; i < cornersX.size(); i++) {
+			int x = cornersX.get(i) - (radius / 2);
+			int y = cornersY.get(i) - (radius / 2);
+
+			g.fillOval(x, y, radius, radius);
+		}
+	}
+
 	private static void drawPolygons(Graphics g) {
 
 		for (int j = 0; j < polygonX.size(); j++) {
@@ -187,6 +199,21 @@ public class Utility {
 		return;
 	}
 
+	public static void addCorners(ImageApp frame, int X, int Y) {
+		if (cornersX.size() == 4) {
+			JOptionPane.showMessageDialog(frame, "4 Corners are marked already.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
+			cornersX.add(X);
+			cornersY.add(Y);
+
+			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
+			status.setText("Status: CORNER MODE X: " + X + " Y: " + Y);
+		}
+		return;
+	}
+
 	// Removes one coordinates from each coordsX & coordsY if num == 1, else
 	// for any other num value it clears the ArrayLists
 	// Disable savePolygon button if frame is not null.
@@ -204,6 +231,17 @@ public class Utility {
 		return;
 	}
 
+	public static void reduceCorners(int num) {
+		if (cornersX.size() > 0 && cornersY.size() > 0 && num == 1) {
+			cornersX.remove(cornersX.size() - 1);
+			cornersY.remove(cornersY.size() - 1);
+		} else {
+			cornersX.clear();
+			cornersY.clear();
+		}
+		return;
+	}
+
 	public static void clearDataStructures() {
 		coordsX.clear();
 		coordsY.clear();
@@ -214,10 +252,14 @@ public class Utility {
 		ContextDialogBox.descAudio.clear();
 	}
 
-	public static void writeOutContext() {
-
+	public static void writeOutContext(String filePath) {
+		
 	}
 
+	public static void sortCorners() {
+		
+	}
+	
 	// fillPolygon and contains both are of the class Polygon
 	// their behavior is expected to be the same
 	public static int pointPolygonTest(int X, int Y) {
