@@ -1,5 +1,6 @@
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 
 public class PointerEvent implements MouseListener {
 	ImageApp frame;
@@ -25,7 +26,12 @@ public class PointerEvent implements MouseListener {
 			frame.repaint();
 		} else {
 			int result = Utility.pointPolygonTest(e.getX(), e.getY());
-			ContextDialogBox.getContextDialogBox(result);
+			try {
+				ContextDialogBox.getContextDialogBox(result);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 

@@ -7,7 +7,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -142,16 +144,21 @@ public class ImageApp extends JPanel {
 		savePolygon = new JButton("SAVE");
 		savePolygon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				if (ContextDialogBox.getContextDialogBox(-1)) {
-					Utility.reduceCoords(0, savePolygon);
-					if (Utility.cornersX.size() == 4) {
-						writeOutContext.setEnabled(true);
-					}
-					editContext.setEnabled(true);
-					editContext.setSelected(false);
+				try {
+					if (ContextDialogBox.getContextDialogBox(-1)) {
+						Utility.reduceCoords(0, savePolygon);
+						if (Utility.corners.size() == 4) {
+							writeOutContext.setEnabled(true);
+						}
+						editContext.setEnabled(true);
+						editContext.setSelected(false);
 
-					removeAll();
-					repaint();
+						removeAll();
+						repaint();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
@@ -162,8 +169,19 @@ public class ImageApp extends JPanel {
 				
 				JFileChooser fileChooser = new JFileChooser();
 				if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
-					String filePath = fileChooser.getSelectedFile().getPath();
-				  	Utility.writeOutContext(filePath);
+					File file = fileChooser.getSelectedFile();
+				  	try {
+						Utility.writeOutContext(file);
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (UnsupportedEncodingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					image = null;
 					Utility.clearDataStructures();
 					savePolygon.setEnabled(false);
@@ -197,8 +215,12 @@ public class ImageApp extends JPanel {
 				} else {
 					isEditMode = false;
 					
+					markCorners.setEnabled(true);
 					clearAllPtsBtn.setEnabled(true);
 					clearLastPtBtn.setEnabled(true);
+					if (Utility.corners.size() == 4) {
+						writeOutContext.setEnabled(true);
+					}
 					
 					JLabel status = (JLabel) statusPanel.getComponent(0);
 					status.setText("Status: ");
@@ -220,7 +242,7 @@ public class ImageApp extends JPanel {
 					repaint();
 				} else {
 					isCornerMode = false;
-					if (Utility.cornersX.size() == 4 && Utility.coordsX.size() > 0) {
+					if (Utility.corners.size() == 4 && Utility.polygons.size() > 0) {
 						writeOutContext.setEnabled(true);
 					}
 					removeAll();

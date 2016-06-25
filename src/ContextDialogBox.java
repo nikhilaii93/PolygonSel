@@ -1,11 +1,11 @@
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.SequenceInputStream;
 import java.util.ArrayList;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -15,6 +15,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -28,20 +29,24 @@ public class ContextDialogBox {
 
 	public static ArrayList<String> titles = new ArrayList<String>();
 	public static ArrayList<String> descText = new ArrayList<String>();
-	public static ArrayList<AudioInputStream> descAudio = new ArrayList<AudioInputStream>();
+	static // public static ArrayList<AudioInputStream> descAudio = new ArrayList<AudioInputStream>();
+	int audioCounter = 0;
 	
 	public static JToggleButton audioCumText;
+	protected static AudioInputStream ais;
 
-	public static AudioInputStream finalStream = null;
-	public static AudioInputStream toAppendStream = null;
-	
-	protected AudioFileFormat.Type FILE_TYPE = AudioFileFormat.Type.WAVE;
+	// public static AudioInputStream finalStream = null;
+	// public static AudioInputStream toAppendStream = null;
+
+	protected static AudioFormat format;
+	protected static AudioFileFormat.Type FILE_TYPE = AudioFileFormat.Type.WAVE;
+	protected static String absPathTempFiles;
 
 	// polygonIndex:
 	// -1 indicates that this is not an edit mode
 	// >=0 value is the index of the polygon detected by polygon test
 	// -2 edit mode is on but the pointer is not inside any polygon
-	public static boolean getContextDialogBox(int polygonIndex) {
+	public static boolean getContextDialogBox(int polygonIndex) throws IOException {
 		if (polygonIndex > -2) {
 			JTextField title = new JTextField();
 			title.setColumns(TITLE_LEN);
@@ -86,8 +91,8 @@ public class ContextDialogBox {
 					} else {
 						audioCumText.setText("Text");
 						textDesc.setEnabled(true);
-						finalStream = null;
-						toAppendStream = null;
+						// finalStream = null;
+						// toAppendStream = null;
 						audioDesc.setEnabled(false);
 						audioDesc.getComponent(0).setEnabled(false);
 						audioDesc.getComponent(1).setEnabled(false);
@@ -98,37 +103,57 @@ public class ContextDialogBox {
 
 			int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter Context Details",
 					JOptionPane.OK_CANCEL_OPTION);
+			boolean contextAdded = false;
 			if (result == JOptionPane.OK_OPTION) {
-
 				if (polygonIndex == -1) {
-					titles.add(title.getText());
-					if (audioCumText.isSelected()) {
-						descText.add("$AUDIO$" + descAudio.size());
-						descAudio.add(finalStream);
-					} else {
+					if (audioCumText.isSelected() && /* finalStream */ais != null
+							&& audioDesc.stopRecordingCalled) {
+						System.out.println("yaha1");
+						titles.add(title.getText());
+						descText.add("$AUDIO$" + audioCounter);
+						// AudioInputStream copyStream = copyAudioInputStream(/* finalStream */ais);
+						// descAudio.add(copyStream);
+						audioCounter++;
+						@SuppressWarnings("unchecked")
+						ArrayList<Point> copyCoords = (ArrayList<Point>) Utility.coords.clone();
+						Utility.polygons.add(copyCoords);
+						contextAdded = true;
+					} else if (!audioCumText.isSelected()) {
+						System.out.println("yaha2");
+						titles.add(title.getText());
 						descText.add(textDesc.getText());
-						descAudio.add(null);
+						// descAudio.add(null);
+						audioCounter++;
+						@SuppressWarnings("unchecked")
+						ArrayList<Point> copyCoords = (ArrayList<Point>) Utility.coords.clone();
+						Utility.polygons.add(copyCoords);
+						contextAdded = true;
 					}
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyX = (ArrayList<Integer>) Utility.coordsX.clone();
-					@SuppressWarnings("unchecked")
-					ArrayList<Integer> copyY = (ArrayList<Integer>) Utility.coordsY.clone();
-					Utility.polygonX.add(copyX);
-					Utility.polygonY.add(copyY);
 				} else {
-					titles.set(polygonIndex, title.getText());
-					if (audioCumText.isSelected()) {
+					if (audioCumText.isSelected() && /* finalStream */ais != null) {
+						System.out.println("yaha3");
+						titles.set(polygonIndex, title.getText());
 						descText.set(polygonIndex, "$AUDIO$" + polygonIndex);
-						descAudio.add(finalStream);
-					} else {
+						// AudioInputStream copyStream = copyAudioInputStream(/* finalStream */ais);
+						// descAudio.add(copyStream);
+						audioCounter++;
+						contextAdded = true;
+					} else if (!audioCumText.isSelected()) {
+						System.out.println("yaha4");
+						titles.set(polygonIndex, title.getText());
 						descText.set(polygonIndex, textDesc.getText());
-						descAudio.set(polygonIndex, null);
+						// descAudio.set(polygonIndex, null);
+						audioCounter++;
+						contextAdded = true;
 					}
 				}
 				System.out.println("Title: " + title.getText());
 				System.out.println("Description: " + textDesc.getText());
 			}
-			return (result == JOptionPane.OK_OPTION);
+			if (!contextAdded) {
+				audioDesc.stopRecording();
+			}
+			return ((result == JOptionPane.OK_OPTION) && contextAdded);
 		}
 		return false;
 	}
@@ -141,6 +166,7 @@ public class ContextDialogBox {
 
 		private JToggleButton recordButton;
 		private TargetDataLine line;
+		protected boolean stopRecordingCalled = false;
 
 		public AudioPane() {
 			setLayout(new GridBagLayout());
@@ -151,7 +177,6 @@ public class ContextDialogBox {
 				public void actionPerformed(ActionEvent e) {
 					if (recordButton.isSelected()) {
 						startRecording();
-						appendRecordings();
 						recordButton.setText("Stop");
 					} else {
 						stopRecording();
@@ -168,6 +193,7 @@ public class ContextDialogBox {
 		}
 
 		protected void stopRecording() {
+			stopRecordingCalled = true;
 			if (line != null) {
 				line.stop();
 				line.close();
@@ -182,7 +208,8 @@ public class ContextDialogBox {
 					@Override
 					public void run() {
 						try {
-							AudioFormat format = getAudioFormat();
+							stopRecordingCalled = false;
+							format = getAudioFormat();
 							DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
 							// checks if system supports the data line
@@ -196,10 +223,23 @@ public class ContextDialogBox {
 
 							System.out.println("In utils.Recorder: Start capturing...");
 
-							AudioInputStream ais = new AudioInputStream(line);
-							toAppendStream = ais;
+							ais = new AudioInputStream(line);
+							File f = new File("$AUDIO$"+audioCounter+".wav");
+							absPathTempFiles = f.getAbsoluteFile().getParent();
+							
+							System.out.println("tempPath : " + absPathTempFiles);
+							
+							AudioSystem.write(ais, AudioFileFormat.Type.WAVE, f);
+							/*
+							 * if (finalStream == null) { finalStream =
+							 * copyAudioInputStream(ais); } else {
+							 * toAppendStream = copyAudioInputStream(ais); }
+							 */
 						} catch (LineUnavailableException ex) {
 							ex.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 						System.out.println("Recording is done");
 					}
@@ -218,25 +258,45 @@ public class ContextDialogBox {
 			return format;
 		}
 
-		protected void appendRecordings() {
-			if (finalStream == null) {
-				finalStream = toAppendStream;
-				toAppendStream = null;
-			} else if (toAppendStream != null) {
-				AudioInputStream appendedStreams = new AudioInputStream(
-						new SequenceInputStream(finalStream, toAppendStream), finalStream.getFormat(),
-						finalStream.getFrameLength() + toAppendStream.getFrameLength());
-				finalStream = appendedStreams;
-				toAppendStream = null;
-			}
-		}
+		// TODO Append doesn't work for wav format getFrameLength() returns -1
+		/*
+		 * protected void appendRecordings() throws IOException { if
+		 * (finalStream == null && toAppendStream != null) { finalStream =
+		 * copyAudioInputStream(toAppendStream); toAppendStream = null; } else
+		 * if (toAppendStream != null) { AudioInputStream appendedStreams = new
+		 * AudioInputStream( new SequenceInputStream(finalStream,
+		 * toAppendStream), finalStream.getFormat(),
+		 * finalStream.getFrameLength() + toAppendStream.getFrameLength());
+		 * finalStream = copyAudioInputStream(appendedStreams); toAppendStream =
+		 * null; } }
+		 */
 	}
-	protected void writeRecording(String fileName) {
+
+	protected static AudioInputStream copyAudioInputStream(AudioInputStream ais) throws IOException {
+		AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File("C:/Users/Nikhil/Documents/trial2.wav"));
+		File tempFile = File.createTempFile("wav", "tmp");
+		AudioSystem.write(ais, AudioFileFormat.Type.WAVE, tempFile);
+		// The fileToByteArray() method reads the file
+		// into a byte array; omitted for brevity
+		AudioInputStream aisCopy = null;
+		try {
+			aisCopy = AudioSystem.getAudioInputStream(tempFile);
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		tempFile.delete();
+		AudioSystem.write(aisCopy, AudioFileFormat.Type.WAVE, new File("C:/Users/Nikhil/Documents/trial1.wav"));
+		
+		return aisCopy;
+	}
+
+	public static void writeRecording(File file, AudioInputStream ais) {
 		try {
 			System.out.println("In utils.Recorder: Start recording...");
 			// start recording
 			System.out.println("Is recoding");
-			AudioSystem.write(finalStream, FILE_TYPE, new File(fileName));
+			AudioSystem.write(ais, FILE_TYPE, file);
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
