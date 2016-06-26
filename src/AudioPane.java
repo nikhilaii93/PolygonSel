@@ -90,6 +90,12 @@ public class AudioPane extends JPanel {
 			line.stop();
 			line.close();
 			line = null;
+			try {
+				ContextDialogBox.ais.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -125,9 +131,11 @@ public class AudioPane extends JPanel {
 							
 						}
 						File f = new File(audioFileName);
-						ContextDialogBox.absPathTempFiles = f.getAbsoluteFile().getParent();
+						if (Utility.absPathTempFiles == null) {
+							Utility.absPathTempFiles = f.getAbsoluteFile().getParent();
+						}
 
-						System.out.println("tempPath : " + ContextDialogBox.absPathTempFiles);
+						System.out.println("tempPath : " + Utility.absPathTempFiles);
 
 						AudioSystem.write(ContextDialogBox.ais, AudioFileFormat.Type.WAVE, f);
 						/*

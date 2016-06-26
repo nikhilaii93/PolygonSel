@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -111,7 +112,9 @@ public class ImageApp extends JPanel {
 		popup.add("Popup Menu");
 		popup.add(new JMenuItem(openAction));
 		popup.add(new JMenuItem(clearAction));
-
+		
+		final ImageApp parentClass = this;
+		
 		clearAllPtsBtn = new JButton("CLEAR");
 		clearAllPtsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -187,6 +190,16 @@ public class ImageApp extends JPanel {
 					savePolygon.setEnabled(false);
 					writeOutContext.setEnabled(false);
 
+					if (Utility.absPathTempFiles != null) {
+						if (Utility.deleteAllWavFiles(Utility.absPathTempFiles)) {
+							System.out.println("Local .wav Files successfully deleted");
+						} else {
+							System.out.println("Local .wav Files were not deleted");
+							JOptionPane.showMessageDialog(parentClass, "Delete local .wav files manually.", "Error",
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
+					
 					removeAll();
 					revalidate();
 					repaint();
@@ -237,11 +250,13 @@ public class ImageApp extends JPanel {
 
 				if (selected) {
 					isCornerMode = true;
+					editContext.setEnabled(false);
 					removeAll();
 					revalidate();
 					repaint();
 				} else {
 					isCornerMode = false;
+					editContext.setEnabled(true);
 					if (Utility.corners.size() == 4 && Utility.polygons.size() > 0) {
 						writeOutContext.setEnabled(true);
 					}

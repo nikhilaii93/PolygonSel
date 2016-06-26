@@ -35,7 +35,8 @@ public class Utility {
 	// public static ArrayList<AudioInputStream> descAudio = new
 	// ArrayList<AudioInputStream>();
 	static int audioCounter = 0;
-
+	protected static String absPathTempFiles = null;
+	
 	public static int radius = 4;
 
 	// Returns resizedImage whose either height or width fits is equal to that
@@ -307,11 +308,16 @@ public class Utility {
 				writer.println(descText.get(i));
 				String audioName = descText.get(i);
 				Path source = FileSystems.getDefault()
-						.getPath(ContextDialogBox.absPathTempFiles + File.separator + audioName + ".wav");
+						.getPath(absPathTempFiles + File.separator + audioName + ".wav");
 				Path target = FileSystems.getDefault().getPath(path + File.separator + audioName + ".wav");
 				System.out.println("source: " + source);
 				System.out.println("target: " + target);
-				Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+				
+				// Copy files instead of move, as the source if busy if another process
+				// will generate error, delete such files afterwards (using deleteAllWaveFiles) and generate
+				// warning for user in case of failure.
+				Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+				
 				// int audioIndex =
 				// Integer.parseInt(audioName.substring(audioName.lastIndexOf("$")+1));
 				// System.out.println(path + File.separator +
@@ -337,6 +343,27 @@ public class Utility {
 		appZip.zipIt(path + ".zip");
 
 		// deletes the folder created
-		file.delete();
+		if (file.delete()) {
+			System.out.println("Folder Deleted Sucessfully");
+		} else {
+			System.out.println("Folder Cannot Be Deleted");
+		}
 	}
+	
+	public static boolean deleteAllWavFiles(String dir) {
+		// Lists all files in folder
+		File folder = new File(dir);
+		File fList[] = folder.listFiles();
+		// Searchs .wav
+		boolean success = true;
+		for (int i = 0; i < fList.length; i++) {
+		    File pes = fList[i];
+		    if (pes.getName().endsWith(".wav") && pes.getName().contains("$AUDIO$")) {
+		        // and deletes
+		        success = success && (pes.delete());
+		    }
+		}
+		return success;
+	}
+	
 }

@@ -30,7 +30,6 @@ public class ContextDialogBox {
 
 	protected static AudioFormat format;
 	protected static AudioFileFormat.Type FILE_TYPE = AudioFileFormat.Type.WAVE;
-	protected static String absPathTempFiles;
 
 	// polygonIndex:
 	// -1 indicates that this is not an edit mode
