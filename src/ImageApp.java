@@ -51,7 +51,7 @@ public class ImageApp extends JPanel {
 	public JToggleButton editContext;
 	public JToggleButton markCorners;
 	public JPanel statusPanel;
-	
+
 	public boolean isEditMode = false;
 	public boolean isCornerMode = false;
 
@@ -166,11 +166,11 @@ public class ImageApp extends JPanel {
 		writeOutContext = new JButton("Generate Output");
 		writeOutContext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+
 				JFileChooser fileChooser = new JFileChooser();
 				if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
-				  	try {
+					try {
 						Utility.writeOutContext(file);
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block
@@ -209,32 +209,32 @@ public class ImageApp extends JPanel {
 					savePolygon.setEnabled(false);
 					markCorners.setEnabled(false);
 					writeOutContext.setEnabled(false);
-					
+
 					JLabel status = (JLabel) statusPanel.getComponent(0);
 					status.setText("Status: EDIT MODE");
 				} else {
 					isEditMode = false;
-					
+
 					markCorners.setEnabled(true);
 					clearAllPtsBtn.setEnabled(true);
 					clearLastPtBtn.setEnabled(true);
 					if (Utility.corners.size() == 4) {
 						writeOutContext.setEnabled(true);
 					}
-					
+
 					JLabel status = (JLabel) statusPanel.getComponent(0);
 					status.setText("Status: ");
 				}
 			}
 		});
-		
+
 		markCorners = new JToggleButton("Corner Mode");
 		markCorners.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AbstractButton abstractButton = (AbstractButton) e.getSource();
 				boolean selected = abstractButton.getModel().isSelected();
 				markCorners.setSelected(selected);
-				
+
 				if (selected) {
 					isCornerMode = true;
 					removeAll();

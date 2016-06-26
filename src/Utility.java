@@ -25,15 +25,22 @@ class CornerComparator implements Comparator<Point> {
 }
 
 public class Utility {
-	// Returns resizedImage whose either height or width fits is equal to that
-	// of the panel.
-	// The ratio of height:width is same for resizedImage and originalImage.
+
 	public static ArrayList<Point> coords = new ArrayList<Point>();
 	public static ArrayList<ArrayList<Point>> polygons = new ArrayList<ArrayList<Point>>();
 	public static ArrayList<Point> corners = new ArrayList<Point>();
 
+	public static ArrayList<String> titles = new ArrayList<String>();
+	public static ArrayList<String> descText = new ArrayList<String>();
+	// public static ArrayList<AudioInputStream> descAudio = new
+	// ArrayList<AudioInputStream>();
+	static int audioCounter = 0;
+
 	public static int radius = 4;
 
+	// Returns resizedImage whose either height or width fits is equal to that
+	// of the panel.
+	// The ratio of height:width is same for resizedImage and originalImage.
 	/*
 	 * public static BufferedImage resizeImage(BufferedImage originalImage,
 	 * JPanel panel) { int orgHt = originalImage.getHeight(); int orgWd =
@@ -237,10 +244,10 @@ public class Utility {
 		coords.clear();
 		polygons.clear();
 		corners.clear();
-		ContextDialogBox.titles.clear();
-		ContextDialogBox.descText.clear();
+		titles.clear();
+		descText.clear();
 		// ContextDialogBox.descAudio.clear();
-		ContextDialogBox.audioCounter = 0;
+		audioCounter = 0;
 	}
 
 	// fillPolygon and contains both are of the class Polygon
@@ -294,11 +301,11 @@ public class Utility {
 			writer.println('\t' + corners.get(i).x + '\t' + corners.get(i).y);
 		}
 		writer.println("=");
-		for (int i = 0; i < ContextDialogBox.titles.size(); i++) {
-			writer.println(ContextDialogBox.titles.get(i));
-			if (ContextDialogBox.descText.get(i).contains("$AUDIO$")) {
-				writer.println(ContextDialogBox.descText.get(i));
-				String audioName = ContextDialogBox.descText.get(i);
+		for (int i = 0; i < titles.size(); i++) {
+			writer.println(titles.get(i));
+			if (descText.get(i).contains("$AUDIO$")) {
+				writer.println(descText.get(i));
+				String audioName = descText.get(i);
 				Path source = FileSystems.getDefault()
 						.getPath(ContextDialogBox.absPathTempFiles + File.separator + audioName + ".wav");
 				Path target = FileSystems.getDefault().getPath(path + File.separator + audioName + ".wav");
@@ -314,7 +321,7 @@ public class Utility {
 				// ContextDialogBox.descAudio.get(audioIndex));
 			} else {
 				writer.println("$TEXT$");
-				writer.println(ContextDialogBox.descText.get(i));
+				writer.println(descText.get(i));
 			}
 			writer.println("=");
 			for (int j = 0; j < polygons.get(i).size(); j++) {
@@ -323,12 +330,12 @@ public class Utility {
 			writer.println("=");
 		}
 		writer.close();
-		
+
 		// zip file
 		ZipUtils appZip = new ZipUtils(path);
 		appZip.generateFileList(new File(path));
 		appZip.zipIt(path + ".zip");
-		
+
 		// deletes the folder created
 		file.delete();
 	}

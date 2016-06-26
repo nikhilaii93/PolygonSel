@@ -23,8 +23,10 @@ public class AudioPane extends JPanel {
 	 */
 	private static final long serialVersionUID = -6483413280444018893L;
 
+	private int polygonIndex = -1;
 	private JToggleButton recordButton;
 	private JButton playButton;
+	private JButton stopButton;
 	private TargetDataLine line;
 	protected boolean stopRecordingCalled = false;
 
@@ -32,8 +34,10 @@ public class AudioPane extends JPanel {
 	AudioInputStream audioInputStream;
 	boolean stopPlayback = false;
 	protected String audioFileName = null;
-	
-	public AudioPane() {
+
+	public AudioPane(int polygonId) {
+		polygonIndex = polygonId;
+		
 		setLayout(new GridBagLayout());
 		recordButton = new JToggleButton("Record");
 		recordButton.setEnabled(false);
@@ -51,16 +55,28 @@ public class AudioPane extends JPanel {
 			}
 		});
 		add(recordButton);
-		
+
 		playButton = new JButton("Play");
 		playButton.setEnabled(false);
 		playButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				stopButton.setEnabled(true);
 				playAudio(audioFileName);
 			}
 		});
 		add(playButton);
+
+		stopButton = new JButton("Stop");
+		stopButton.setEnabled(false);
+		stopButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Terminate playback before EOF
+				stopPlayback = true;
+			}
+		}
+		);
+		add(stopButton);
 	}
 
 	@Override
@@ -101,7 +117,12 @@ public class AudioPane extends JPanel {
 
 						ContextDialogBox.ais = new AudioInputStream(line);
 						if (audioFileName == null) {
-							audioFileName = "$AUDIO$" + ContextDialogBox.audioCounter + ".wav"; 
+							if (polygonIndex == -1) {
+								audioFileName = "$AUDIO$" + Utility.audioCounter + ".wav";
+							} else {
+								audioFileName = "$AUDIO$" + polygonIndex + ".wav";
+							}
+							
 						}
 						File f = new File(audioFileName);
 						ContextDialogBox.absPathTempFiles = f.getAbsoluteFile().getParent();

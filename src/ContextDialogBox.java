@@ -22,12 +22,6 @@ import javax.swing.JToggleButton;
 public class ContextDialogBox {
 	public static int TITLE_LEN = 50;
 
-	public static ArrayList<String> titles = new ArrayList<String>();
-	public static ArrayList<String> descText = new ArrayList<String>();
-	static // public static ArrayList<AudioInputStream> descAudio = new
-			// ArrayList<AudioInputStream>();
-	int audioCounter = 0;
-
 	public static JToggleButton audioCumText;
 	protected static AudioInputStream ais;
 
@@ -52,14 +46,14 @@ public class ContextDialogBox {
 
 			JPanel desc = new JPanel();
 			final TextArea textDesc = new TextArea();
-			final AudioPane audioDesc = new AudioPane();
+			final AudioPane audioDesc = new AudioPane(polygonIndex);
 			desc.add(textDesc);
 			desc.add(audioDesc);
 
 			if (polygonIndex >= 0) {
-				title.setText(titles.get(polygonIndex));
-				if (!descText.get(polygonIndex).contains("$AUDIO$")) {
-					textDesc.setText(descText.get(polygonIndex));
+				title.setText(Utility.titles.get(polygonIndex));
+				if (!Utility.descText.get(polygonIndex).contains("$AUDIO$")) {
+					textDesc.setText(Utility.descText.get(polygonIndex));
 				}
 			}
 
@@ -103,21 +97,21 @@ public class ContextDialogBox {
 			if (result == JOptionPane.OK_OPTION) {
 				if (polygonIndex == -1) {
 					if (audioCumText.isSelected() && /* finalStream */ais != null && audioDesc.stopRecordingCalled) {
-						titles.add(title.getText());
-						descText.add("$AUDIO$" + audioCounter);
+						Utility.titles.add(title.getText());
+						Utility.descText.add("$AUDIO$" + Utility.audioCounter);
 						// AudioInputStream copyStream = copyAudioInputStream(/*
 						// finalStream */ais);
 						// descAudio.add(copyStream);
-						audioCounter++;
+						Utility.audioCounter++;
 						@SuppressWarnings("unchecked")
 						ArrayList<Point> copyCoords = (ArrayList<Point>) Utility.coords.clone();
 						Utility.polygons.add(copyCoords);
 						contextAdded = true;
 					} else if (!audioCumText.isSelected()) {
-						titles.add(title.getText());
-						descText.add(textDesc.getText());
+						Utility.titles.add(title.getText());
+						Utility.descText.add(textDesc.getText());
 						// descAudio.add(null);
-						audioCounter++;
+						Utility.audioCounter++;
 						@SuppressWarnings("unchecked")
 						ArrayList<Point> copyCoords = (ArrayList<Point>) Utility.coords.clone();
 						Utility.polygons.add(copyCoords);
@@ -125,18 +119,16 @@ public class ContextDialogBox {
 					}
 				} else {
 					if (audioCumText.isSelected() && /* finalStream */ais != null) {
-						titles.set(polygonIndex, title.getText());
-						descText.set(polygonIndex, "$AUDIO$" + polygonIndex);
+						Utility.titles.set(polygonIndex, title.getText());
+						Utility.descText.set(polygonIndex, "$AUDIO$" + polygonIndex);
 						// AudioInputStream copyStream = copyAudioInputStream(/*
 						// finalStream */ais);
 						// descAudio.add(copyStream);
-						audioCounter++;
 						contextAdded = true;
 					} else if (!audioCumText.isSelected()) {
-						titles.set(polygonIndex, title.getText());
-						descText.set(polygonIndex, textDesc.getText());
+						Utility.titles.set(polygonIndex, title.getText());
+						Utility.descText.set(polygonIndex, textDesc.getText());
 						// descAudio.set(polygonIndex, null);
-						audioCounter++;
 						contextAdded = true;
 					}
 				}
