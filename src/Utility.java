@@ -299,7 +299,10 @@ public class Utility {
 
 		writer.println("corners");
 		for (int i = 0; i < corners.size(); i++) {
-			writer.println('\t' + corners.get(i).x + '\t' + corners.get(i).y);
+			writer.print('\t');
+			writer.print(corners.get(i).x);
+			writer.print('\t');
+			writer.println(corners.get(i).y);
 		}
 		writer.println("=");
 		for (int i = 0; i < titles.size(); i++) {
@@ -331,9 +334,12 @@ public class Utility {
 			}
 			writer.println("=");
 			for (int j = 0; j < polygons.get(i).size(); j++) {
-				writer.println('\t' + polygons.get(i).get(j).x + '\t' + polygons.get(i).get(j).y);
+				writer.print('\t');
+				writer.print(polygons.get(i).get(j).x);
+				writer.print('\t');
+				writer.println(polygons.get(i).get(j).y);
 			}
-			writer.println("=");
+			writer.print("=");
 		}
 		writer.close();
 
