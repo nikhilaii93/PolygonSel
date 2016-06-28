@@ -18,7 +18,7 @@ public class PointerEvent implements MouseListener {
 	public void mousePressed(MouseEvent e) {
 		if (!frame.isEditMode) {
 			if (!frame.isCornerMode) {
-				ColorBlobDetection.onTouch(e.getX(), e.getY());
+				// ColorBlobDetection.onTouch(e.getX(), e.getY());
 				Utility.addCoords(frame, e.getX(), e.getY());
 			} else {
 				Utility.addCorners(frame, e.getX(), e.getY());

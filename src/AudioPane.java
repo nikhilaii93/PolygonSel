@@ -127,16 +127,9 @@ public class AudioPane extends JPanel {
 								audioFileName = "$AUDIO$" + Utility.audioCounter + ".wav";
 							} else {
 								audioFileName = "$AUDIO$" + polygonIndex + ".wav";
-							}
-							
+							}	
 						}
 						File f = new File(audioFileName);
-						if (Utility.absPathTempFiles == null) {
-							Utility.absPathTempFiles = f.getAbsoluteFile().getParent();
-						}
-
-						System.out.println("tempPath : " + Utility.absPathTempFiles);
-
 						AudioSystem.write(ContextDialogBox.ais, AudioFileFormat.Type.WAVE, f);
 						/*
 						 * if (finalStream == null) { finalStream =

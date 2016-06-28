@@ -41,8 +41,9 @@ public class ImageApp extends JPanel {
 	private static final long serialVersionUID = 5062796287923742976L;
 	private static final int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	private JFileChooser chooser = new JFileChooser();
-	private Action openAction = new ImageOpenAction("Open");
+	private Action openAction = new ImageOpenAction("Open Image");
 	private Action clearAction = new ClearAction("Clear");
+	private Action importAction = new ContextOpenAction("Import Context");
 	private JPopupMenu popup = new JPopupMenu();
 	public BufferedImage image;
 	private JButton clearAllPtsBtn;
@@ -65,6 +66,7 @@ public class ImageApp extends JPanel {
 		menu.setMnemonic('F');
 		menu.add(new JMenuItem(openAction));
 		menu.add(new JMenuItem(clearAction));
+		menu.add(new JMenuItem(importAction));
 		menuBar.add(menu);
 
 		menuBar.add(clearAllPtsBtn);
@@ -103,6 +105,9 @@ public class ImageApp extends JPanel {
 		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		statusPanel.add(statusLabel);
 
+		File currFile = new File(".");
+		Utility.absPathTempFiles = currFile.getAbsoluteFile().getName();
+		
 		f.setVisible(true);
 	}
 
@@ -112,9 +117,10 @@ public class ImageApp extends JPanel {
 		popup.add("Popup Menu");
 		popup.add(new JMenuItem(openAction));
 		popup.add(new JMenuItem(clearAction));
-		
+		popup.add(new JMenuItem(importAction));
+
 		final ImageApp parentClass = this;
-		
+
 		clearAllPtsBtn = new JButton("CLEAR");
 		clearAllPtsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -199,7 +205,7 @@ public class ImageApp extends JPanel {
 									JOptionPane.ERROR_MESSAGE);
 						}
 					}
-					
+
 					removeAll();
 					revalidate();
 					repaint();
@@ -348,6 +354,39 @@ public class ImageApp extends JPanel {
 				} catch (IOException ex) {
 					ex.printStackTrace(System.err);
 				}
+			}
+		}
+	}
+
+	private class ContextOpenAction extends AbstractAction {
+
+		/**
+		 * Auto-generated serial ID
+		 */
+		private static final long serialVersionUID = -390416284658457321L;
+
+		public ContextOpenAction(String name) {
+			super(name);
+			this.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
+			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Zip Files", "zip");
+			chooser.setFileFilter(filter);
+			int returnVal = chooser.showOpenDialog(chooser);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File f = chooser.getSelectedFile();
+				try {
+					ImportContext.openContext(f);
+				} catch (IOException e1) {
+					//JOptionPane.showMessageDialog(this, "Error in importing, file format wrong.", "Error",
+						//	JOptionPane.ERROR_MESSAGE);
+					e1.printStackTrace();
+				}
+				revalidate();
+				repaint();
 			}
 		}
 	}

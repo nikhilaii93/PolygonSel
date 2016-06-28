@@ -20,7 +20,7 @@ public class ColorBlobDetection {
 	// private static Scalar blobColorRgb = new Scalar(255, 255, 255, 255);
 	private static Scalar blobColorHsv;
 	private static Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
-	private static String imgPath = "C:/Users/Nikhil/Documents/politicalMap.png";
+	private static String imgPath = "C:/Users/Nikhil/Documents/computer.jpg";
 	private static String savePath = "C:/Users/Nikhil/Documents/contoured.png";
 	
 	public static Scalar convertScalarRgba2Hsv(Scalar rgbColor) {
