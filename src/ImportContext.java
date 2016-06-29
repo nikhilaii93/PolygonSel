@@ -56,6 +56,7 @@ public class ImportContext {
             ArrayList<Point> contour = new ArrayList<Point>();
             
             // Skip the first empty line
+            line = br.readLine();
             while ((line = br.readLine()) != null) {
                 line = br.readLine();
                 Utility.titles.add(line.trim());

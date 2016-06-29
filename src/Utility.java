@@ -339,7 +339,7 @@ public class Utility {
 				writer.print('\t');
 				writer.println(polygons.get(i).get(j).y);
 			}
-			writer.print("=");
+			writer.println("=");
 		}
 		writer.close();
 
