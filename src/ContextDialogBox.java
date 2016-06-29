@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -51,8 +54,12 @@ public class ContextDialogBox {
 
 			if (polygonIndex >= 0) {
 				title.setText(Utility.titles.get(polygonIndex));
-				if (!Utility.descText.get(polygonIndex).contains("$AUDIO$")) {
-					textDesc.setText(Utility.descText.get(polygonIndex));
+				if (!Utility.descriptions.get(polygonIndex).contains("$AUDIO$")) {
+					textDesc.setText(Utility.descriptions.get(polygonIndex));
+				} else {
+					// TODO Check if audio file is deleted if now text description replaces it.
+					Path target = FileSystems.getDefault().getPath(Utility.descriptions.get(polygonIndex) + ".wav");
+					Files.delete(target);
 				}
 			}
 
@@ -97,7 +104,7 @@ public class ContextDialogBox {
 				if (polygonIndex == -1) {
 					if (audioCumText.isSelected() && /* finalStream */ais != null && audioDesc.stopRecordingCalled) {
 						Utility.titles.add(title.getText());
-						Utility.descText.add("$AUDIO$" + Utility.audioCounter);
+						Utility.descriptions.add("$AUDIO$" + Utility.audioCounter);
 						// AudioInputStream copyStream = copyAudioInputStream(/*
 						// finalStream */ais);
 						// descAudio.add(copyStream);
@@ -108,7 +115,7 @@ public class ContextDialogBox {
 						contextAdded = true;
 					} else if (!audioCumText.isSelected()) {
 						Utility.titles.add(title.getText());
-						Utility.descText.add(textDesc.getText());
+						Utility.descriptions.add(textDesc.getText());
 						// descAudio.add(null);
 						Utility.audioCounter++;
 						@SuppressWarnings("unchecked")
@@ -119,14 +126,14 @@ public class ContextDialogBox {
 				} else {
 					if (audioCumText.isSelected() && /* finalStream */ais != null) {
 						Utility.titles.set(polygonIndex, title.getText());
-						Utility.descText.set(polygonIndex, "$AUDIO$" + polygonIndex);
+						Utility.descriptions.set(polygonIndex, "$AUDIO$" + polygonIndex);
 						// AudioInputStream copyStream = copyAudioInputStream(/*
 						// finalStream */ais);
 						// descAudio.add(copyStream);
 						contextAdded = true;
 					} else if (!audioCumText.isSelected()) {
 						Utility.titles.set(polygonIndex, title.getText());
-						Utility.descText.set(polygonIndex, textDesc.getText());
+						Utility.descriptions.set(polygonIndex, textDesc.getText());
 						// descAudio.set(polygonIndex, null);
 						contextAdded = true;
 					}

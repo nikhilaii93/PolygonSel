@@ -31,7 +31,7 @@ public class Utility {
 	public static ArrayList<Point> corners = new ArrayList<Point>();
 
 	public static ArrayList<String> titles = new ArrayList<String>();
-	public static ArrayList<String> descText = new ArrayList<String>();
+	public static ArrayList<String> descriptions = new ArrayList<String>();
 	// public static ArrayList<AudioInputStream> descAudio = new
 	// ArrayList<AudioInputStream>();
 	static int audioCounter = 0;
@@ -246,7 +246,7 @@ public class Utility {
 		polygons.clear();
 		corners.clear();
 		titles.clear();
-		descText.clear();
+		descriptions.clear();
 		// ContextDialogBox.descAudio.clear();
 		audioCounter = 0;
 	}
@@ -307,9 +307,9 @@ public class Utility {
 		writer.println("=");
 		for (int i = 0; i < titles.size(); i++) {
 			writer.println(titles.get(i));
-			if (descText.get(i).contains("$AUDIO$")) {
-				writer.println(descText.get(i));
-				String audioName = descText.get(i);
+			if (descriptions.get(i).contains("$AUDIO$")) {
+				writer.println(descriptions.get(i));
+				String audioName = descriptions.get(i);
 				Path source = FileSystems.getDefault()
 						.getPath(absPathTempFiles + File.separator + audioName + ".wav");
 				Path target = FileSystems.getDefault().getPath(path + File.separator + audioName + ".wav");
@@ -330,7 +330,7 @@ public class Utility {
 				// ContextDialogBox.descAudio.get(audioIndex));
 			} else {
 				writer.println("$TEXT$");
-				writer.println(descText.get(i));
+				writer.println(descriptions.get(i));
 			}
 			writer.println("=");
 			for (int j = 0; j < polygons.get(i).size(); j++) {

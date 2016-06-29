@@ -44,42 +44,43 @@ public class ImportContext {
             File file = new File(filename);
             BufferedReader br = new BufferedReader(new FileReader(file));
 
-            // Skip first line
+         // Skip first line
             String line = br.readLine();
             // Fill corners
             int t = 0;
-            while(t < 4 && (line = br.readLine()) != null) {
+            while (t < 4 && (line = br.readLine()) != null) {
                 Utility.corners.add(getPoint(line));
                 t++;
             }
-            double xOffset = Utility.corners.get(0).x;
-            double yOffset = Utility.corners.get(0).y;
-
+            
             ArrayList<Point> contour = new ArrayList<Point>();
-            boolean firstTime = true;
+            
             // Skip the first empty line
             while ((line = br.readLine()) != null) {
-                if (line.equals("=")) {
-                    line = br.readLine();
-                    Utility.titles.add(line.trim());
-                    if (!firstTime) {
-                        Utility.polygons.add(contour);
-
-                        contour = new ArrayList<Point>();
-                    }
-                    firstTime = false;
+                line = br.readLine();
+                Utility.titles.add(line.trim());
+                line = br.readLine();
+                if (line.startsWith("$AUDIO$")) {
+                    Utility.descriptions.add(line.trim());
                 } else {
+                    String desc = "";
+                    while ((line = br.readLine()) != "=") {
+                        desc += line;
+                    }
+                    Utility.descriptions.add(desc);
+                }
+                while ((line = br.readLine()) != "=") {
                     Point gP = getPoint(line);
-                    gP.x -= xOffset;
-                    gP.y -= yOffset;
                     contour.add(gP);
                 }
+                Utility.polygons.add(contour);
             }
-            Utility.polygons.add(contour);
             br.close();
-        } catch (IOException e) {
+        } catch (
+                IOException e
+                )
+        {
             e.printStackTrace();
-            System.out.println("File format not correct");
         }
     }
 	
