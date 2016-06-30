@@ -34,7 +34,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ImageApp extends JPanel {
-
 	/**
 	 * Auto-generated serial ID
 	 */
@@ -45,7 +44,7 @@ public class ImageApp extends JPanel {
 	private Action clearAction = new ClearAction("Clear");
 	private Action importAction = new ContextOpenAction("Import Context");
 	private JPopupMenu popup = new JPopupMenu();
-	public BufferedImage image;
+	public static BufferedImage image;
 	private JButton clearAllPtsBtn;
 	private JButton clearLastPtBtn;
 	public JButton savePolygon;
@@ -180,7 +179,7 @@ public class ImageApp extends JPanel {
 				if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					try {
-						Utility.writeOutContext(file);
+						Utility.writeOutContext(file, image);
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -367,8 +366,8 @@ public class ImageApp extends JPanel {
 
 		public ContextOpenAction(String name) {
 			super(name);
-			this.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
-			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
+			this.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
+			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK));
 		}
 
 		@Override
@@ -379,7 +378,16 @@ public class ImageApp extends JPanel {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File f = chooser.getSelectedFile();
 				try {
+					Utility.clearDataStructures();
+					removeAll();
+					savePolygon.setEnabled(false);
+					writeOutContext.setEnabled(false);
+					clearLastPtBtn.setEnabled(true);
+					clearAllPtsBtn.setEnabled(true);
+					markCorners.setEnabled(true);
 					ImportContext.openContext(f);
+					revalidate();
+					repaint();
 				} catch (IOException e1) {
 					//JOptionPane.showMessageDialog(this, "Error in importing, file format wrong.", "Error",
 						//	JOptionPane.ERROR_MESSAGE);

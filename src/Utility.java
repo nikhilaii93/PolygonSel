@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,12 +27,12 @@ class CornerComparator implements Comparator<Point> {
 }
 
 public class Utility {
-
 	public static ArrayList<Point> coords = new ArrayList<Point>();
 	public static ArrayList<ArrayList<Point>> polygons = new ArrayList<ArrayList<Point>>();
 	public static ArrayList<Point> corners = new ArrayList<Point>();
 
 	public static ArrayList<String> titles = new ArrayList<String>();
+	// Contains text description or audio file name without extension
 	public static ArrayList<String> descriptions = new ArrayList<String>();
 	// public static ArrayList<AudioInputStream> descAudio = new
 	// ArrayList<AudioInputStream>();
@@ -84,7 +86,7 @@ public class Utility {
 	 */
 
 	public static void drawPoint(ImageApp frame, int X, int Y) {
-		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
+		if (ImageApp.image != null && X <= ImageApp.image.getWidth() && Y <= ImageApp.image.getHeight()) {
 			Graphics g = frame.getGraphics(); // Getting the Graphic object
 			g.setColor(Color.red); // Setting color to red
 			int x = X - (radius / 2); // Position X (mouse will be in the center
@@ -141,7 +143,6 @@ public class Utility {
 	}
 
 	private static void drawPolygons(Graphics g) {
-
 		for (int j = 0; j < polygons.size(); j++) {
 			ArrayList<Point> cXY = polygons.get(j);
 			for (int i = 0; i < cXY.size(); i++) {
@@ -182,7 +183,7 @@ public class Utility {
 	// the image.
 	// Also, the point selected should form a convex polygon.
 	public static void addCoords(ImageApp frame, int X, int Y) {
-		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
+		if (ImageApp.image != null && X <= ImageApp.image.getWidth() && Y <= ImageApp.image.getHeight()) {
 			coords.add(new Point(X, Y));
 
 			if (pointPolygonTest(X, Y) >= 0) {
@@ -208,7 +209,7 @@ public class Utility {
 			JOptionPane.showMessageDialog(frame, "4 Corners are marked already.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		if (frame.image != null && X <= frame.image.getWidth() && Y <= frame.image.getHeight()) {
+		if (ImageApp.image != null && X <= ImageApp.image.getWidth() && Y <= ImageApp.image.getHeight()) {
 			corners.add(new Point(X, Y));
 
 			JLabel status = (JLabel) frame.statusPanel.getComponent(0);
@@ -286,7 +287,7 @@ public class Utility {
 		}
 	}
 
-	public static void writeOutContext(File file) throws IOException {
+	public static void writeOutContext(File file, BufferedImage image) throws IOException {
 		sortCorners();
 		file.mkdir();
 		String path = file.getAbsolutePath();
@@ -320,14 +321,6 @@ public class Utility {
 				// will generate error, delete such files afterwards (using deleteAllWaveFiles) and generate
 				// warning for user in case of failure.
 				Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-				
-				// int audioIndex =
-				// Integer.parseInt(audioName.substring(audioName.lastIndexOf("$")+1));
-				// System.out.println(path + File.separator +
-				// ContextDialogBox.descText.get(i));
-				// ContextDialogBox.writeRecording(new File(path +
-				// File.separator + ContextDialogBox.descText.get(i) + ".wav"),
-				// ContextDialogBox.descAudio.get(audioIndex));
 			} else {
 				writer.println("$TEXT$");
 				writer.println(descriptions.get(i));
@@ -343,6 +336,9 @@ public class Utility {
 		}
 		writer.close();
 
+		File outputfile = new File(path + File.separator + fileName + ".jpg");;
+		ImageIO.write(image, "jpg", outputfile);
+		
 		// zip file
 		ZipUtils appZip = new ZipUtils(path);
 		appZip.generateFileList(new File(path));
