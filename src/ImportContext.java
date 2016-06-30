@@ -44,7 +44,7 @@ public class ImportContext {
             File file = new File(filename);
             BufferedReader br = new BufferedReader(new FileReader(file));
 
-         // Skip first line
+            // Skip first line
             String line = br.readLine();
             // Fill corners
             int t = 0;
@@ -55,26 +55,33 @@ public class ImportContext {
             
             ArrayList<Point> contour = new ArrayList<Point>();
             
-            // Skip the first empty line
+            // Skip line = "="
             line = br.readLine();
             while ((line = br.readLine()) != null) {
-                line = br.readLine();
                 Utility.titles.add(line.trim());
                 line = br.readLine();
                 if (line.startsWith("$AUDIO$")) {
                     Utility.descriptions.add(line.trim());
                 } else {
                     String desc = "";
+                    // Skip line = "$TEXT""
+                    line = br.readLine();
                     while ((line = br.readLine()) != "=") {
                         desc += line;
+                        line = br.readLine();
                     }
                     Utility.descriptions.add(desc);
                 }
-                while ((line = br.readLine()) != "=") {
+                // Skip line = "="
+                line = br.readLine();
+                while (!line.equals("=")) {
                     Point gP = getPoint(line);
                     contour.add(gP);
+                    line = br.readLine();
                 }
                 Utility.polygons.add(contour);
+                // Skip line = "="
+                line = br.readLine();
             }
             br.close();
         } catch (
