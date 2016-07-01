@@ -19,8 +19,8 @@ public class ColorBlobDetection {
 	private static ColorBlobDetector colorBlobDetector;
 	// private static Scalar blobColorRgb = new Scalar(255, 255, 255, 255);
 	private static Scalar blobColorHsv;
-	private static Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
-	private static String imgPath = "C:/Users/Nikhil/Documents/computer.jpg";
+	private static Scalar CONTOUR_COLOR = new Scalar(0, 0, 255, 255);
+	private static String imgPath = "C:/Users/Nikhil/Documents/politicalMap.png";
 	private static String savePath = "C:/Users/Nikhil/Documents/contoured.png";
 	
 	public static Scalar convertScalarRgba2Hsv(Scalar rgbColor) {
@@ -81,15 +81,27 @@ public class ColorBlobDetection {
         touchedRect.width = (x+4 < image.cols()) ? x + 4 - touchedRect.x : image.cols() - touchedRect.x;
         touchedRect.height = (y+4 < image.rows()) ? y + 4 - touchedRect.y : image.rows() - touchedRect.y;
 
+        System.out.println("touchedRect1: " + touchedRect.x + " " + touchedRect.y);
+        System.out.println("touchedRect2: " + touchedRect.width + " " + touchedRect.height);
+        
         Mat touchedRegionRgba = image.submat(touchedRect);
 
         Mat touchedRegionHsv = new Mat();
         Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
 
         // Calculate average color of touched region
+        
         blobColorHsv = Core.sumElems(touchedRegionHsv);
+        int pointCount = touchedRect.width*touchedRect.height;
+        for (int i = 0; i < blobColorHsv.val.length; i++) {
+        	blobColorHsv.val[i] /= pointCount;
+        }
+        
+        System.out.println("hsvColor: " + blobColorHsv);
         
         Mat contouredImage = drawContours(image);
 		Highgui.imwrite(savePath, contouredImage);
+		
+		return;
 	}
 }

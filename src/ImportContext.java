@@ -48,24 +48,17 @@ public class ImportContext {
 
 			// Skip first line
 			String line = br.readLine();
-			System.out.println("line1: " + line);
 			// Fill corners
 			int t = 0;
 			while (t < 4 && (line = br.readLine()) != null) {
-				System.out.println("line2: " + line);
 				Utility.corners.add(getPoint(line));
 				t++;
 			}
-			
-			
 			// Skip line = "="
 			line = br.readLine();
-			System.out.println("line3: " + line);
 			while ((line = br.readLine()) != null) {
-				System.out.println("line4: " + line);
 				Utility.titles.add(line.trim());
 				line = br.readLine();
-				System.out.println("line5: " + line);
 				if (line.startsWith("$AUDIO$")) {
 					Utility.descriptions.add(line.trim());
 					copyAudioFile(folderName, line.trim());
@@ -79,18 +72,15 @@ public class ImportContext {
 						line = br.readLine();
 					}
 					Utility.descriptions.add(desc);
-					System.out.println("line6: " + desc);
 				}
 				// Skip line = "="
 				line = br.readLine();
 				ArrayList<Point> contour = new ArrayList<Point>();
 				while (!line.equals("=")) {
-					System.out.println("line8: " + line);
 					Point gP = getPoint(line);
 					contour.add(gP);
 					line = br.readLine();
 				}
-				System.out.println("line9: " + line);
 				Utility.polygons.add(contour);
 			}
 			br.close();
