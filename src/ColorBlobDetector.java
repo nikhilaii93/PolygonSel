@@ -119,6 +119,7 @@ public class ColorBlobDetector {
             }
         }
     }
+    
     public List<MatOfPoint> getContours() {
         return mContours;
     }

@@ -273,6 +273,28 @@ public class Utility {
 		return polygonIndex;
 	}
 
+	/*
+	public boolean polygonTest(Point test, List<Point> points) {
+        Log.i("POLYGON_TEST", "polygonTestRunning");
+        int i;
+        int j;
+        boolean result = false;
+
+        for (int a = 0; a < points.size(); a++) {
+            Log.i("POLYGON_TEST", "Points " + a + ": " + points.get(a).x + "  " + points.get(a).y);
+        }
+        for (i = 0, j = points.size() - 1; i < points.size(); j = i++) {
+
+            if ((points.get(i).y > test.y) != (points.get(j).y > test.y) &&
+                    (test.x < (points.get(j).x - points.get(i).x) * (test.y - points.get(i).y) / (points.get(j).y - points.get(i).y) + points.get(i).x)) {
+                result = !result;
+            }
+        }
+
+        return result;
+    }
+	*/
+	
 	public static void sortCorners() {
 		Collections.sort(corners, new CornerComparator());
 		Point a = (Point) corners.get(1).clone();

@@ -67,7 +67,7 @@ public class ContextDialogBox {
 			myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
 			myPanel.add(new JLabel("Title")); // 0
 			myPanel.add(title); // 1
-			myPanel.add(new JLabel("Discription")); // 2
+			myPanel.add(new JLabel("Description")); // 2
 			myPanel.add(audioCumText); // 3
 			myPanel.add(desc); // 4
 
